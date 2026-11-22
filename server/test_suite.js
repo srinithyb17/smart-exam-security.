@@ -39,7 +39,7 @@ async function runTestSuite() {
   const studentId = studentAuth.user.id;
 
   // 4. Student Management: Add Student & Duplicate Protection
-  const testRegNo = '910021104999';
+  const testRegNo = '91002' + Math.floor(100000 + Math.random() * 900000);
   const addStudentRes = await fetch(`${BASE_URL}/students`, {
     method: 'POST',
     headers: {
@@ -88,6 +88,19 @@ async function runTestSuite() {
   console.log('✅ Test 7: Protected PDF Access (Unauthorized Request Blocked) OK');
 
   // 7. Start Exam Session (Single-Session Enforcement)
+  // Ensure clean session state using newly added admin Remove from Cockpit endpoint
+  const existingSessionsRes = await fetch(`${BASE_URL}/sessions/exam/${sampleExam.id}`, {
+    headers: { 'Authorization': `Bearer ${adminToken}` }
+  });
+  const existingData = await existingSessionsRes.json();
+  const prevSession = (existingData.sessions || []).find(s => s.student_id === studentId);
+  if (prevSession) {
+    await fetch(`${BASE_URL}/sessions/${prevSession.id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+  }
+
   const startSessionRes = await fetch(`${BASE_URL}/sessions/start`, {
     method: 'POST',
     headers: {

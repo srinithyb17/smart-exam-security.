@@ -468,4 +468,126 @@ router.post('/:id/force-lock', authenticateToken, requireAdmin, (req, res) => {
   }
 });
 
+// Admin: Remove from Cockpit / Terminate active session
+router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const session = db.prepare('SELECT * FROM exam_sessions WHERE id = ?').get(id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    db.prepare('DELETE FROM exam_sessions WHERE id = ?').run(id);
+
+    logSecurityEvent(
+      session.exam_id,
+      session.student_id,
+      'SESSION_TERMINATED',
+      'MEDIUM',
+      `Administrator (${req.user.username}) removed candidate from cockpit`,
+      req.ip || '127.0.0.1'
+    );
+
+    res.json({ message: 'Candidate removed from active cockpit successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove session from cockpit' });
+  }
+});
+
+// Admin: Manual Re-Admit / Unlock Session
+router.post('/:id/unlock', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const session = db.prepare('SELECT * FROM exam_sessions WHERE id = ?').get(id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    db.prepare(`
+      UPDATE exam_sessions SET
+        status = 'IN_PROGRESS',
+        violations_count = 0,
+        reset_status = 'APPROVED',
+        reset_reviewed_at = CURRENT_TIMESTAMP,
+        reset_reviewed_by = ?
+      WHERE id = ?
+    `).run(req.user.id, id);
+
+    logSecurityEvent(
+      session.exam_id,
+      session.student_id,
+      'ADMIN_MANUAL_UNLOCKED',
+      'LOW',
+      `Administrator (${req.user.username}) manually unlocked candidate session and reset strikes`,
+      req.ip || '127.0.0.1'
+    );
+
+    res.json({ message: 'Candidate unlocked and re-admitted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unlock session' });
+  }
+});
+
+// Admin: Force Submit Student Exam Paper
+router.post('/:id/force-submit', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const session = db.prepare('SELECT * FROM exam_sessions WHERE id = ?').get(id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    db.prepare(`
+      UPDATE exam_sessions SET
+        status = 'SUBMITTED',
+        end_time = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(id);
+
+    logSecurityEvent(
+      session.exam_id,
+      session.student_id,
+      'ADMIN_FORCE_SUBMITTED',
+      'LOW',
+      `Administrator (${req.user.username}) force-submitted candidate exam paper`,
+      req.ip || '127.0.0.1'
+    );
+
+    res.json({ message: 'Candidate paper finalized and submitted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to force submit session' });
+  }
+});
+
+// Admin: Issue Manual Strike (+1 Strike)
+router.post('/:id/strike', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const session = db.prepare('SELECT s.*, e.max_violations FROM exam_sessions s JOIN exams e ON e.id = s.exam_id WHERE s.id = ?').get(id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    const newStrikes = (session.violations_count || 0) + 1;
+    const shouldLock = newStrikes >= session.max_violations;
+
+    db.prepare(`
+      UPDATE exam_sessions SET
+        violations_count = ?,
+        status = ?
+      WHERE id = ?
+    `).run(newStrikes, shouldLock ? 'LOCKED' : session.status, id);
+
+    logSecurityEvent(
+      session.exam_id,
+      session.student_id,
+      'MANUAL_STRIKE_ISSUED',
+      shouldLock ? 'CRITICAL' : 'HIGH',
+      `Administrator issued manual strike: ${reason || 'Physical or verbal irregularity observed in exam hall'} (Strikes: ${newStrikes}/${session.max_violations})`,
+      req.ip || '127.0.0.1'
+    );
+
+    res.json({
+      message: shouldLock ? `Strike added. Session locked (Limit ${session.max_violations} reached).` : `Strike added (${newStrikes}/${session.max_violations}).`,
+      strikes: newStrikes,
+      locked: shouldLock
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to issue strike' });
+  }
+});
+
 module.exports = router;
