@@ -1,20 +1,66 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
   body {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     overflow-x: hidden;
+    background-color: #030712;
+    color: #f1f5f9;
+    font-family: var(--font-sans);
+  }
+
+  /* Custom sleek scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #090d16;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
   }
 }
 
-/* Prevent text selection and drag inside exam view */
-.no-select {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
+/* Background Grids & Technical Patterns */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.bg-dot-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+}
+
+/* Glassmorphism Cards */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-panel-glow {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 30px -10px rgba(59, 130, 246, 0.15);
 }
 
 /* Watermark styles */
@@ -25,7 +71,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   grid-gap: 40px;
-  opacity: 0.16;
+  opacity: 0.14;
   overflow: hidden;
-  z-index: 40;
+  z-index: 30;
+}
+
+/* Prevent selection inside exam view */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }

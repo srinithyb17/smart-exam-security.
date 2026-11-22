@@ -4,7 +4,9 @@ import { api } from '../../utils/api';
 import SecurePdfViewer from '../../components/SecurePdfViewer';
 import FullscreenGuard from '../../components/FullscreenGuard';
 import {
+  Shield,
   ShieldAlert,
+  ShieldCheck,
   Clock,
   AlertTriangle,
   CheckCircle,
@@ -12,7 +14,10 @@ import {
   Lock,
   Send,
   HelpCircle,
-  FileCheck
+  FileCheck,
+  Radio,
+  Eye,
+  Info
 } from 'lucide-react';
 
 export default function ExamScreen({ examId }) {
@@ -35,6 +40,7 @@ export default function ExamScreen({ examId }) {
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   // Reset Appeal State (for locked exam)
   const [resetReason, setResetReason] = useState('');
@@ -44,7 +50,6 @@ export default function ExamScreen({ examId }) {
 
   // 1. Report Security Event to Server
   const reportSecurityEvent = useCallback(async (eventType, details) => {
-    // Debounce duplicate events within 1.5 seconds
     const now = Date.now();
     if (now - lastEventTimeRef.current < 1500) return;
     lastEventTimeRef.current = now;
@@ -105,7 +110,7 @@ export default function ExamScreen({ examId }) {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.message || 'Unable to start exam session');
+          setError(err.message || 'Unable to initialize secure exam session');
           setLoading(false);
         }
       }
@@ -138,7 +143,7 @@ export default function ExamScreen({ examId }) {
           setRemainingSeconds(res.remainingSeconds);
         }
       } catch (err) {
-        console.warn('Heartbeat missed:', err);
+        console.warn('Heartbeat telemetry missed:', err);
       }
     }, 15000);
 
@@ -167,7 +172,6 @@ export default function ExamScreen({ examId }) {
   useEffect(() => {
     if (!sessionToken || isLocked) return;
 
-    // A. Tab Visibility Detection
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsWindowBlurred(true);
@@ -177,7 +181,6 @@ export default function ExamScreen({ examId }) {
       }
     };
 
-    // B. Window Focus Detection
     const handleWindowBlur = () => {
       setIsWindowBlurred(true);
       reportSecurityEvent('WINDOW_BLUR', 'Examination window lost focus to another application');
@@ -187,9 +190,7 @@ export default function ExamScreen({ examId }) {
       setIsWindowBlurred(false);
     };
 
-    // C. Anti-Screenshot, DevTools, Copy-Paste Blocking
     const handleKeyDown = (e) => {
-      // PrintScreen Key
       if (e.key === 'PrintScreen' || e.keyCode === 44) {
         e.preventDefault();
         try { navigator.clipboard.writeText(''); } catch (_) {}
@@ -197,7 +198,6 @@ export default function ExamScreen({ examId }) {
         return false;
       }
 
-      // F12 or DevTools shortcuts
       if (
         e.key === 'F12' ||
         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))
@@ -207,14 +207,12 @@ export default function ExamScreen({ examId }) {
         return false;
       }
 
-      // Ctrl+P (Print), Ctrl+S (Save), Ctrl+U (View Source)
       if (e.ctrlKey && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S' || e.key === 'u' || e.key === 'U')) {
         e.preventDefault();
         reportSecurityEvent('DEVTOOLS_ATTEMPT', `Shortcut Ctrl+${e.key.toUpperCase()} blocked`);
         return false;
       }
 
-      // Ctrl+C, Ctrl+V, Ctrl+X
       if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V' || e.key === 'x' || e.key === 'X')) {
         e.preventDefault();
         reportSecurityEvent('COPY_PASTE_ATTEMPT', `Clipboard shortcut Ctrl+${e.key.toUpperCase()} blocked`);
@@ -222,8 +220,7 @@ export default function ExamScreen({ examId }) {
       }
     };
 
-    // D. Browser Tab Close / Unload Interruption Handler
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = () => {
       const data = JSON.stringify({ examId, sessionToken });
       const blob = new Blob([data], { type: 'application/json' });
       navigator.sendBeacon('/api/sessions/interrupt', blob);
@@ -244,12 +241,10 @@ export default function ExamScreen({ examId }) {
     };
   }, [sessionToken, isLocked, reportSecurityEvent, examId]);
 
-  // Handle Fullscreen Exit
   const handleFullscreenExit = () => {
-    reportSecurityEvent('FULLSCREEN_EXIT', 'Student exited fullscreen mode');
+    reportSecurityEvent('FULLSCREEN_EXIT', 'Candidate exited fullscreen examination mode');
   };
 
-  // Submit Exam
   const handleConfirmSubmit = async () => {
     setSubmitting(true);
     try {
@@ -278,7 +273,6 @@ export default function ExamScreen({ examId }) {
     }
   };
 
-  // Handle Reset Appeal
   const handleSendResetAppeal = async (e) => {
     e.preventDefault();
     if (!resetReason.trim()) return;
@@ -293,7 +287,6 @@ export default function ExamScreen({ examId }) {
     }
   };
 
-  // Format Seconds to HH:MM:SS
   const formatTimer = (secs) => {
     if (secs === null || secs === undefined) return '--:--:--';
     const h = Math.floor(secs / 3600);
@@ -302,68 +295,71 @@ export default function ExamScreen({ examId }) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // If loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-white">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h2 className="text-xl font-bold">Initializing Secure Exam Session...</h2>
-        <p className="text-slate-400 text-sm mt-1">Verifying single-session token & device credentials</p>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-white bg-grid-pattern">
+        <div className="relative w-16 h-16 mb-4">
+          <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 animate-ping"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <h2 className="text-xl font-black tracking-tight">Initializing Examination Cockpit...</h2>
+        <p className="text-slate-400 text-xs mt-1 font-mono">
+          Verifying Single-Device Lock & Syncing Anti-Malpractice Telemetry
+        </p>
       </div>
     );
   }
 
-  // If error occurred on entry
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-red-500/40 rounded-3xl p-8 text-center text-white shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 bg-grid-pattern">
+        <div className="max-w-md w-full bg-slate-900 border border-red-500/40 rounded-3xl p-8 text-center text-white shadow-2xl glass-panel">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Access Restricted</h2>
-          <p className="text-sm text-red-300 mb-6">{error}</p>
+          <h2 className="text-2xl font-black text-white mb-2">Access Restricted</h2>
+          <p className="text-xs text-red-300 mb-6 leading-relaxed">{error}</p>
           <a
             href="#/student"
-            className="inline-block py-2.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition"
+            className="inline-block py-3 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition"
           >
-            Return to Dashboard
+            Return to Candidate Dashboard
           </a>
         </div>
       </div>
     );
   }
 
-  // If session is LOCKED due to Malpractice
+  // Session LOCKED View
   if (isLocked) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-slate-900 border border-red-500/50 rounded-3xl p-8 text-center shadow-2xl">
-          <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
-            <ShieldAlert className="w-10 h-10 text-red-400" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 bg-grid-pattern">
+        <div className="max-w-lg w-full bg-slate-900 border border-red-500/50 rounded-3xl p-8 text-center shadow-2xl glass-panel">
+          <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert className="w-10 h-10 text-red-400 animate-pulse" />
           </div>
 
           <h2 className="text-2xl font-black text-white mb-1">
-            EXAMINATION SESSION LOCKED
+            EXAMINATION SESSION SUSPENDED
           </h2>
-          <p className="text-xs font-mono text-red-400 uppercase tracking-widest mb-4">
-            Malpractice Threshold Exceeded ({violationsCount} / {maxViolations} Violations)
+          <p className="text-xs font-mono text-red-400 uppercase tracking-widest mb-4 font-bold">
+            Malpractice Strike Limit Reached ({violationsCount} / {maxViolations} Strikes)
           </p>
 
-          <p className="text-sm text-slate-300 mb-6 leading-relaxed">
-            {lockMessage || 'Your examination session has been automatically locked due to repeated tab switching, window focus loss, or fullscreen exit.'}
+          <p className="text-xs text-slate-300 mb-6 leading-relaxed">
+            {lockMessage || 'Your examination session has been suspended by the automated security monitor due to repeated tab switching, window focus loss, or fullscreen violations.'}
           </p>
 
           {resetSubmitted ? (
-            <div className="p-4 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl text-emerald-300 text-xs text-center">
-              <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
-              <p className="font-semibold text-white">Reset Appeal Under Review</p>
+            <div className="p-5 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl text-emerald-300 text-xs text-center font-medium">
+              <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto mb-1.5" />
+              <p className="font-bold text-white text-sm">Appeal Under Review</p>
               <p className="text-[11px] text-slate-300 mt-1">
-                Your request has been delivered to the chief examination administrator. Please await invigilator approval.
+                Your incident appeal is currently queued in the invigilator's approval desk. Please wait for authorization.
               </p>
               <a
                 href="#/student"
-                className="mt-4 inline-block py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition"
+                className="mt-4 inline-block py-2 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition"
               >
                 Return to Dashboard
               </a>
@@ -371,15 +367,15 @@ export default function ExamScreen({ examId }) {
           ) : (
             <form onSubmit={handleSendResetAppeal} className="space-y-4 text-left">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Submit Explanation / Reset Appeal
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2 font-mono">
+                  State Your Appeal for Re-entry
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={resetReason}
                   onChange={(e) => setResetReason(e.target.value)}
-                  placeholder="Explain why your session was interrupted or lost focus..."
+                  placeholder="Explain why your window lost focus or session was interrupted..."
                   className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -387,17 +383,17 @@ export default function ExamScreen({ examId }) {
               <div className="flex items-center justify-between gap-3 pt-2">
                 <a
                   href="#/student"
-                  className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-medium text-slate-300 transition"
+                  className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition"
                 >
-                  Exit to Dashboard
+                  Exit to Portal
                 </a>
                 <button
                   type="submit"
                   disabled={!resetReason.trim()}
-                  className="py-2.5 px-6 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shadow-lg shadow-red-500/20 transition disabled:opacity-50"
+                  className="py-2.5 px-6 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-red-500/20 transition disabled:opacity-50 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Send Reset Appeal</span>
+                  <span>Transmit Appeal</span>
                 </button>
               </div>
             </form>
@@ -412,36 +408,39 @@ export default function ExamScreen({ examId }) {
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col select-none relative overflow-hidden">
         {/* Anti-Screen Peek Blur Mask (Triggered when window is unfocused/minimized) */}
         {isWindowBlurred && (
-          <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/40 flex items-center justify-center mb-4">
-              <ShieldAlert className="w-8 h-8 text-red-400 animate-pulse" />
+          <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+            <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/40 flex items-center justify-center mb-4 shadow-2xl shadow-red-500/20">
+              <ShieldAlert className="w-10 h-10 text-red-400 animate-pulse" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
-              Security Violation: Window Unfocused
+            <h3 className="text-2xl font-black text-white tracking-tight mb-2">
+              Visual Shield Activated: Window Unfocused
             </h3>
-            <p className="text-sm text-slate-300 max-w-md mb-4">
-              You navigated away from the exam tab. Question paper view is hidden until focus is restored.
+            <p className="text-xs text-slate-300 max-w-md mb-4 leading-relaxed">
+              You navigated away from the exam tab. Question paper view is masked to prevent external assistance or screenshot leakage.
             </p>
-            <p className="text-xs font-mono text-amber-400">
-              Violations: {violationsCount} of {maxViolations} permitted strikes
+            <div className="px-4 py-2 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold">
+              Violations: {violationsCount} of {maxViolations} Permitted Strikes
+            </div>
+            <p className="text-[11px] text-slate-500 mt-4">
+              Click anywhere on this screen to restore focus.
             </p>
           </div>
         )}
 
-        {/* Security Violation Toast Alert */}
+        {/* Floating Security Violation Alert Toast */}
         {recentViolationToast && (
-          <div className="fixed top-20 right-6 z-40 max-w-sm w-full bg-red-950/90 border border-red-500/50 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-bounce">
+          <div className="fixed top-20 right-6 z-40 max-w-sm w-full bg-red-950/95 border border-red-500/50 rounded-2xl p-4 shadow-2xl backdrop-blur-xl animate-bounce">
             <div className="flex items-start gap-3">
               <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-white uppercase tracking-wider">
-                  Malpractice Event Logged
+                <p className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                  Security Strike Recorded
                 </p>
                 <p className="text-xs text-red-200 mt-0.5">
                   {recentViolationToast.details}
                 </p>
                 <div className="mt-2 flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-red-300">{recentViolationToast.time}</span>
+                  <span className="text-slate-400">{recentViolationToast.time}</span>
                   <span className="text-amber-400 font-bold">
                     Strikes: {violationsCount} / {maxViolations}
                   </span>
@@ -451,58 +450,75 @@ export default function ExamScreen({ examId }) {
           </div>
         )}
 
-        {/* Exam Navigation Header Bar */}
-        <header className="bg-slate-900 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20">
+        {/* Master Examination Control Header */}
+        <header className="bg-slate-900/95 border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20 backdrop-blur-xl shadow-lg">
+          {/* Left: Exam Details */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
               <FileCheck className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-white tracking-tight truncate max-w-[200px] sm:max-w-sm">
-                {exam?.title}
-              </h2>
-              <p className="text-[11px] text-slate-400 font-mono">
-                {exam?.exam_code} • {user?.register_number} ({user?.name})
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-mono font-bold">
+                  {exam?.exam_code}
+                </span>
+                <h2 className="text-sm sm:text-base font-bold text-white tracking-tight truncate max-w-[180px] sm:max-w-md">
+                  {exam?.title}
+                </h2>
+              </div>
+              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                Candidate: <strong className="text-slate-200">{user?.register_number}</strong> ({user?.name})
               </p>
             </div>
           </div>
 
-          {/* Synchronized Countdown Timer & Malpractice Meter */}
-          <div className="flex items-center gap-3 sm:gap-6">
-            {/* Countdown Timer */}
+          {/* Right: Countdown Clock, Telemetry Pill, Finish Button */}
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* Countdown Clock */}
             <div
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border font-mono text-sm sm:text-base font-bold shadow-inner ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-2xl border font-mono text-sm sm:text-base font-black shadow-inner tracking-wider ${
                 remainingSeconds !== null && remainingSeconds < 300
-                  ? 'bg-red-950/60 border-red-500/50 text-red-400 animate-pulse'
+                  ? 'bg-red-950/80 border-red-500/60 text-red-400 animate-pulse'
                   : remainingSeconds !== null && remainingSeconds < 900
-                  ? 'bg-amber-950/60 border-amber-500/50 text-amber-400'
+                  ? 'bg-amber-950/80 border-amber-500/60 text-amber-400'
                   : 'bg-slate-950 border-slate-800 text-emerald-400'
               }`}
             >
-              <Clock className="w-4 h-4" />
+              <Clock className="w-4 h-4 shrink-0" />
               <span>{formatTimer(remainingSeconds)}</span>
             </div>
 
-            {/* Violations Strike Meter */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-              <span className="text-slate-500">Violations:</span>
-              <span className={`font-mono font-bold ${violationsCount > 0 ? 'text-amber-400' : 'text-slate-300'}`}>
-                {violationsCount} / {maxViolations}
+            {/* Strike Indicator Capsule */}
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono">
+              <span className="text-slate-500">Strikes:</span>
+              <span className={`font-bold ${violationsCount > 0 ? 'text-amber-400' : 'text-slate-300'}`}>
+                {violationsCount}/{maxViolations}
               </span>
             </div>
+
+            {/* Code of conduct button */}
+            {exam?.instructions && (
+              <button
+                onClick={() => setShowInstructions(true)}
+                className="hidden lg:flex items-center gap-1 p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white text-xs transition cursor-pointer"
+                title="View Exam Instructions"
+              >
+                <Info className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Finish & Submit Button */}
             <button
               onClick={() => setShowSubmitModal(true)}
-              className="py-2 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5"
+              className="py-2.5 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-xl shadow-emerald-500/25 transition-all flex items-center gap-1.5 cursor-pointer transform hover:-translate-y-0.5"
             >
               <CheckCircle className="w-4 h-4" />
-              <span>Submit Exam</span>
+              <span>Submit Paper</span>
             </button>
           </div>
         </header>
 
-        {/* Main Body: Custom Secure PDF Viewer */}
+        {/* Main Body: Custom Secure PDF Canvas Viewer */}
         <div className="flex-1 p-3 sm:p-6 overflow-hidden flex flex-col">
           <SecurePdfViewer
             examId={examId}
@@ -513,19 +529,19 @@ export default function ExamScreen({ examId }) {
           />
         </div>
 
-        {/* Submit Confirmation Modal */}
+        {/* Submit Confirmation Dialog */}
         {showSubmitModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-6 h-6 text-emerald-400" />
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl glass-panel-glow">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-7 h-7 text-emerald-400" />
               </div>
 
-              <h3 className="text-lg font-bold text-white text-center mb-2">
-                Submit Examination?
+              <h3 className="text-xl font-black text-white text-center mb-2 tracking-tight">
+                Finalize & Submit Exam?
               </h3>
               <p className="text-xs text-slate-300 text-center mb-6 leading-relaxed">
-                Are you sure you want to finalize and submit your examination? Once submitted, your answers will be locked and question paper access will expire immediately.
+                Are you ready to submit your paper? Once confirmed, your responses are finalized and question paper access will be sealed immediately.
               </p>
 
               <div className="flex items-center justify-end gap-3">
@@ -533,19 +549,40 @@ export default function ExamScreen({ examId }) {
                   type="button"
                   onClick={() => setShowSubmitModal(false)}
                   disabled={submitting}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-medium text-slate-300 transition"
+                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition cursor-pointer"
                 >
-                  Continue Exam
+                  Return to Exam
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmSubmit}
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/25"
+                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-xs font-bold text-white transition flex items-center gap-1.5 shadow-xl shadow-emerald-500/25 cursor-pointer"
                 >
-                  {submitting ? 'Submitting...' : 'Yes, Submit Now'}
+                  {submitting ? 'Sealing Paper...' : 'Confirm Submission'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Instructions Drawer */}
+        {showInstructions && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl glass-panel">
+              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-400" />
+                <span>Exam Code of Conduct</span>
+              </h3>
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed mb-6 font-mono">
+                {exam?.instructions}
+              </div>
+              <button
+                onClick={() => setShowInstructions(false)}
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                Close Notice
+              </button>
             </div>
           </div>
         )}

@@ -1,13 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import WatermarkOverlay from './WatermarkOverlay';
-import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Shield, AlertTriangle, Loader2 } from 'lucide-react';
+import {
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
+  ShieldAlert,
+  AlertTriangle,
+  Loader2,
+  FileText,
+  Lock,
+  Maximize2
+} from 'lucide-react';
 
 // Setup worker
 try {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '4.0.379'}/pdf.worker.min.mjs`;
 } catch (e) {
-  console.warn('PDF.js worker initialization error:', e);
+  console.warn('PDF.js worker setup warning:', e);
 }
 
 export default function SecurePdfViewer({
@@ -20,9 +33,10 @@ export default function SecurePdfViewer({
   const [pdfDoc, setPdfDoc] = useState(null);
   const [pageNum, setPageNum] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [scale, setScale] = useState(1.2);
+  const [scale, setScale] = useState(1.25);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageInput, setPageInput] = useState('1');
 
   const canvasRef = useRef(null);
   const renderTaskRef = useRef(null);
@@ -43,7 +57,7 @@ export default function SecurePdfViewer({
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `Failed to fetch paper: Status ${res.status}`);
+          throw new Error(errData.error || `Access denied: Status ${res.status}`);
         }
 
         const arrayBuffer = await res.arrayBuffer();
@@ -58,6 +72,7 @@ export default function SecurePdfViewer({
           setPdfDoc(doc);
           setTotalPages(doc.numPages);
           setPageNum(1);
+          setPageInput('1');
           setLoading(false);
         }
       } catch (err) {
@@ -75,7 +90,7 @@ export default function SecurePdfViewer({
     };
   }, [examId]);
 
-  // Render current page to Canvas
+  // Render current page to Canvas with Retina / High-DPI support
   useEffect(() => {
     if (!pdfDoc || !canvasRef.current) return;
 
@@ -95,8 +110,14 @@ export default function SecurePdfViewer({
         if (!canvas) return;
 
         const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        const pixelRatio = window.devicePixelRatio || 1;
+
+        canvas.height = viewport.height * pixelRatio;
+        canvas.width = viewport.width * pixelRatio;
+        canvas.style.height = `${viewport.height}px`;
+        canvas.style.width = `${viewport.width}px`;
+
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
         const renderContext = {
           canvasContext: context,
@@ -123,16 +144,39 @@ export default function SecurePdfViewer({
     };
   }, [pdfDoc, pageNum, scale]);
 
-  // Zoom Handlers
-  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.4));
+  // Page navigation handlers
+  const handlePrevPage = () => {
+    if (pageNum > 1) {
+      const next = pageNum - 1;
+      setPageNum(next);
+      setPageInput(next.toString());
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pageNum < totalPages) {
+      const next = pageNum + 1;
+      setPageNum(next);
+      setPageInput(next.toString());
+    }
+  };
+
+  const handlePageInputSubmit = (e) => {
+    e.preventDefault();
+    const parsed = parseInt(pageInput, 10);
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= totalPages) {
+      setPageNum(parsed);
+    } else {
+      setPageInput(pageNum.toString());
+    }
+  };
+
+  // Zoom handlers
+  const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.6));
   const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.2, 0.7));
-  const handleResetZoom = () => setScale(1.2);
+  const handleResetZoom = () => setScale(1.25);
 
-  // Page Handlers
-  const handlePrevPage = () => setPageNum((prev) => Math.max(prev - 1, 1));
-  const handleNextPage = () => setPageNum((prev) => Math.min(prev + 1, totalPages));
-
-  // Security handlers: block right click & print screen
+  // Security handlers
   const handleContextMenu = (e) => {
     e.preventDefault();
     if (onViolation) onViolation('RIGHT_CLICK_ATTEMPT', 'Right-click context menu prohibited');
@@ -142,99 +186,122 @@ export default function SecurePdfViewer({
   return (
     <div
       onContextMenu={handleContextMenu}
-      className="flex flex-col h-full bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden select-none"
+      className="flex flex-col h-full bg-slate-950 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden select-none"
     >
-      {/* Viewer Control Toolbar */}
-      <div className="bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-slate-300">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-lg text-xs font-semibold">
+      {/* Top Floating Glassmorphism Toolbar */}
+      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex flex-wrap items-center justify-between gap-4 text-slate-300 z-10 shadow-lg">
+        {/* Status Pill */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-xl text-xs font-semibold shadow-inner">
             <Shield className="w-3.5 h-3.5 text-blue-400" />
-            <span>Secure Canvas Mode</span>
+            <span>Secure Canvas Stream</span>
           </div>
-          <span className="text-xs text-slate-400 hidden sm:inline">
-            Direct download & printing disabled
+          <span className="text-[11px] text-slate-500 hidden sm:inline font-mono">
+            • Direct Download Blocked
           </span>
         </div>
 
-        {/* Page and Zoom Navigation Controls */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+        {/* Page & Zoom Navigation Dock */}
+        <div className="flex items-center gap-3">
+          {/* Page Jumper */}
+          <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl p-1 shadow-inner">
             <button
               onClick={handlePrevPage}
               disabled={pageNum <= 1 || loading}
-              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition"
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition cursor-pointer"
               title="Previous Page"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono font-medium px-2 text-slate-200">
-              Page {pageNum} of {totalPages || 1}
-            </span>
+
+            <form onSubmit={handlePageInputSubmit} className="flex items-center gap-1 text-xs font-mono font-bold px-1 text-slate-200">
+              <span>Page</span>
+              <input
+                type="text"
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onBlur={handlePageInputSubmit}
+                className="w-8 py-0.5 text-center bg-slate-900 border border-slate-700 rounded text-blue-400 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-slate-500">/ {totalPages || 1}</span>
+            </form>
+
             <button
               onClick={handleNextPage}
               disabled={pageNum >= totalPages || loading}
-              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition"
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:hover:bg-transparent transition cursor-pointer"
               title="Next Page"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="h-4 w-px bg-slate-800 hidden sm:block"></div>
+          <div className="h-5 w-px bg-slate-800 hidden sm:block"></div>
 
-          <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl p-1 shadow-inner">
             <button
               onClick={handleZoomOut}
               disabled={loading || scale <= 0.7}
-              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 transition"
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-30 transition cursor-pointer"
               title="Zoom Out"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono px-1.5 text-slate-300 min-w-[45px] text-center">
+            <span className="text-xs font-mono font-semibold px-2 text-slate-300 min-w-[48px] text-center">
               {Math.round(scale * 100)}%
             </span>
             <button
               onClick={handleZoomIn}
-              disabled={loading || scale >= 2.4}
-              className="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 transition"
+              disabled={loading || scale >= 2.6}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-30 transition cursor-pointer"
               title="Zoom In"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
             <button
               onClick={handleResetZoom}
-              className="p-1 rounded hover:bg-slate-800 text-slate-300 transition"
-              title="Reset Zoom"
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 transition cursor-pointer"
+              title="Reset Zoom to 100%"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Canvas Display Area with Dynamic Watermarking */}
-      <div className="relative flex-1 overflow-auto bg-slate-950 p-4 md:p-8 flex items-center justify-center">
+      {/* Main Canvas Viewport */}
+      <div className="relative flex-1 overflow-auto bg-slate-950 p-4 sm:p-8 flex items-center justify-center">
         {loading && (
-          <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-            <p className="text-sm font-medium">Decrypting and streaming question paper...</p>
+          <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 animate-ping"></div>
+              <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-sm font-semibold text-slate-200">
+              Streaming & Decrypting Question Paper...
+            </p>
+            <p className="text-xs font-mono text-slate-500">
+              Enforcing Candidate Watermarking Matrix
+            </p>
           </div>
         )}
 
         {error && (
-          <div className="max-w-md bg-red-950/40 border border-red-500/40 rounded-xl p-6 text-center text-red-300">
-            <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-            <h4 className="font-semibold text-base mb-1 text-white">Protected Access Denied</h4>
-            <p className="text-xs text-red-300 mb-4">{error}</p>
-            <p className="text-[11px] text-slate-400">
-              Only authenticated students during the active scheduled exam window can view this paper.
+          <div className="max-w-md bg-red-950/40 border border-red-500/40 rounded-3xl p-8 text-center text-red-300 glass-panel shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-red-400" />
+            </div>
+            <h4 className="font-bold text-lg text-white mb-2">Access Restricted</h4>
+            <p className="text-xs text-red-300 mb-4 leading-relaxed">{error}</p>
+            <p className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-3">
+              Only authenticated candidates during active examination hours with authorized session tokens can decrypt this question paper.
             </p>
           </div>
         )}
 
         {!loading && !error && (
-          <div className="relative inline-block shadow-2xl rounded-sm border border-slate-700 bg-white">
+          <div className="relative inline-block shadow-2xl rounded-sm border border-slate-700/80 bg-white">
             {/* The Raw Rendered PDF Canvas */}
             <canvas
               ref={canvasRef}

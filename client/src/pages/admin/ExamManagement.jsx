@@ -13,7 +13,9 @@ import {
   Eye,
   Upload,
   FileCheck,
-  CheckCircle2
+  CheckCircle2,
+  FileUp,
+  Lock
 } from 'lucide-react';
 
 export default function ExamManagement() {
@@ -33,7 +35,7 @@ export default function ExamManagement() {
     end_time: '',
     duration_minutes: 180,
     max_violations: 3,
-    instructions: '1. Fullscreen mode is mandatory.\n2. Tab switching will trigger malpractice alerts.\n3. Dynamic watermarks protect question papers.'
+    instructions: '1. Fullscreen mode is strictly enforced throughout the exam.\n2. Tab switching or window blur will trigger automatic malpractice strikes.\n3. Exceeding maximum permitted strikes locks the examination session.\n4. Dynamic watermarking identifies candidates to prevent phone photography.'
   });
   const [paperFile, setPaperFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -148,28 +150,35 @@ export default function ExamManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col bg-grid-pattern">
       <Navbar currentPath="/admin/exams" />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-2">
-              <FileText className="w-6 h-6 text-blue-400" />
-              <h1 className="text-2xl font-extrabold text-white">Exam Scheduling & Question Papers</h1>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
-                {exams.length} exams
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+              <span className="text-xs font-mono uppercase tracking-widest text-indigo-400 font-bold">
+                Examination Vault & Timetable
               </span>
             </div>
-            <p className="text-slate-400 text-xs sm:text-sm mt-1">
-              Upload secure PDF question papers, configure release timers, and set violation thresholds
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Scheduled Examinations
+              </h1>
+              <span className="text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-bold">
+                {exams.length} Courses
+              </span>
+            </div>
+            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
+              Secure PDF question paper storage, automated timed release gating and strike configurations
             </p>
           </div>
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shadow-lg shadow-blue-500/25 transition"
+            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-blue-500/25 transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create & Schedule Exam</span>
@@ -179,43 +188,43 @@ export default function ExamManagement() {
         {/* Exams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            <div className="col-span-full text-center py-12 text-slate-500">
-              Loading examinations...
+            <div className="col-span-full text-center py-16 text-slate-500 font-mono text-xs">
+              Loading scheduled examination records...
             </div>
           ) : exams.length === 0 ? (
-            <div className="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
+            <div className="col-span-full glass-panel rounded-3xl p-16 text-center text-slate-400">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-600" />
-              <h3 className="text-base font-semibold text-white mb-1">No Exams Scheduled</h3>
-              <p className="text-xs text-slate-500 mb-4">Click below to create your first secure online examination.</p>
+              <h3 className="text-base font-bold text-white mb-1">No Examinations Scheduled</h3>
+              <p className="text-xs text-slate-500 mb-4">Click below to upload question papers and schedule your first exam.</p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-blue-600 rounded-xl text-xs font-semibold text-white"
+                className="px-5 py-2.5 bg-blue-600 rounded-xl text-xs font-bold text-white cursor-pointer"
               >
-                Create Exam
+                Schedule Exam Now
               </button>
             </div>
           ) : (
             exams.map((exam) => (
               <div
                 key={exam.id}
-                className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 flex flex-col justify-between shadow-xl transition"
+                className="glass-panel rounded-3xl p-6 flex flex-col justify-between shadow-xl border border-slate-800 hover:border-slate-700 transition"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold">
+                    <span className="px-3 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold">
                       {exam.exam_code}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">
-                      {exam.department || 'All'}
+                    <span className="text-xs text-slate-400 font-mono font-semibold">
+                      Dept: {exam.department || 'All'}
                     </span>
                   </div>
 
                   <h3 className="text-lg font-bold text-white mb-1">{exam.title}</h3>
                   <p className="text-xs text-slate-400 mb-4">{exam.subject}</p>
 
-                  <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 space-y-2 text-xs font-mono text-slate-300 mb-4">
+                  <div className="bg-slate-950/80 rounded-2xl p-3.5 border border-slate-800/80 space-y-2 text-xs font-mono text-slate-300 mb-4">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Start Time:</span>
+                      <span className="text-slate-500 font-sans">Start Time:</span>
                       <span className="text-slate-200">
                         {new Date(exam.start_time).toLocaleString([], {
                           month: 'short',
@@ -226,17 +235,17 @@ export default function ExamManagement() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Duration:</span>
+                      <span className="text-slate-500 font-sans">Duration:</span>
                       <span className="text-emerald-400 font-bold">{exam.duration_minutes} Mins</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Violations Limit:</span>
+                      <span className="text-slate-500 font-sans">Max Strikes:</span>
                       <span className="text-amber-400 font-bold">{exam.max_violations} strikes</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Paper PDF:</span>
-                      <span className="text-blue-400 font-sans truncate max-w-[130px]">
-                        {exam.paper_original_name || 'No file attached'}
+                      <span className="text-slate-500 font-sans">Question Paper:</span>
+                      <span className="text-blue-400 font-sans truncate max-w-[130px] font-semibold">
+                        {exam.paper_original_name || 'Attached'}
                       </span>
                     </div>
                   </div>
@@ -245,24 +254,24 @@ export default function ExamManagement() {
                 <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
                   <a
                     href={`#/admin/monitor?examId=${exam.id}`}
-                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1.5"
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 font-mono"
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    <span>Live Monitor</span>
+                    <span>Live Cockpit</span>
                   </a>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => { setEditingExam(exam); setShowEditModal(true); }}
-                      className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
-                      title="Edit Exam"
+                      className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl transition cursor-pointer border border-slate-800"
+                      title="Edit Schedule & Paper"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeleteExam(exam.id, exam.title)}
-                      className="p-1.5 bg-slate-800 hover:bg-red-600 hover:text-white text-slate-400 rounded-lg transition"
-                      title="Delete Exam"
+                      className="p-2 bg-slate-900 hover:bg-red-600 hover:text-white text-slate-400 rounded-xl transition cursor-pointer border border-slate-800"
+                      title="Delete Examination"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -276,14 +285,14 @@ export default function ExamManagement() {
 
       {/* Create Exam Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl my-8">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl my-8 glass-panel-glow">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-blue-400" />
-                Schedule New Examination
+                <span>Schedule New Examination</span>
               </h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -291,7 +300,7 @@ export default function ExamManagement() {
             <form onSubmit={handleCreateExam} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Exam Code *
                   </label>
                   <input
@@ -300,11 +309,11 @@ export default function ExamManagement() {
                     placeholder="e.g. CS8591"
                     value={examForm.exam_code}
                     onChange={(e) => setExamForm({ ...examForm, exam_code: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Department
                   </label>
                   <input
@@ -312,14 +321,14 @@ export default function ExamManagement() {
                     placeholder="e.g. CSE"
                     value={examForm.department}
                     onChange={(e) => setExamForm({ ...examForm, department: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Exam Title *
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                  Examination Title *
                 </label>
                 <input
                   type="text"
@@ -327,13 +336,13 @@ export default function ExamManagement() {
                   placeholder="e.g. Computer Networks Semester Examination"
                   value={examForm.title}
                   onChange={(e) => setExamForm({ ...examForm, title: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Subject *
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                  Subject Name *
                 </label>
                 <input
                   type="text"
@@ -341,13 +350,13 @@ export default function ExamManagement() {
                   placeholder="e.g. Computer Networks"
                   value={examForm.subject}
                   onChange={(e) => setExamForm({ ...examForm, subject: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Start Date & Time *
                   </label>
                   <input
@@ -355,11 +364,11 @@ export default function ExamManagement() {
                     required
                     value={examForm.start_time}
                     onChange={(e) => setExamForm({ ...examForm, start_time: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     End Date & Time *
                   </label>
                   <input
@@ -367,14 +376,14 @@ export default function ExamManagement() {
                     required
                     value={examForm.end_time}
                     onChange={(e) => setExamForm({ ...examForm, end_time: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Duration (Minutes) *
                   </label>
                   <input
@@ -387,8 +396,8 @@ export default function ExamManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Max Violations Allowed *
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                    Violation Strikes Limit *
                   </label>
                   <input
                     type="number"
@@ -404,26 +413,26 @@ export default function ExamManagement() {
 
               {/* PDF Question Paper Upload */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Upload Question Paper (PDF Format) *
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                  Question Paper (PDF Format) *
                 </label>
-                <div className="border border-dashed border-slate-700 rounded-xl p-4 bg-slate-950/60 text-center">
+                <div className="border border-dashed border-slate-700 hover:border-slate-500 rounded-2xl p-5 bg-slate-950/60 text-center">
                   <input
                     type="file"
                     accept=".pdf"
                     required
                     onChange={(e) => setPaperFile(e.target.files[0])}
-                    className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
+                    className="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"
                   />
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    Stored securely outside public access. Decrypted and streamed only to authorized students.
+                  <p className="text-[11px] text-slate-500 mt-2 font-mono">
+                    Encrypted and stored outside webroot. Streamed with candidate watermarks.
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Examination Instructions
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                  Candidate Instructions
                 </label>
                 <textarea
                   rows={3}
@@ -437,16 +446,16 @@ export default function ExamManagement() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-medium text-slate-300"
+                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white shadow-lg shadow-blue-500/25 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-blue-500/25 disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Creating Exam...' : 'Schedule Exam'}
+                  {submitting ? 'Creating Exam...' : 'Confirm Schedule'}
                 </button>
               </div>
             </form>
@@ -456,21 +465,21 @@ export default function ExamManagement() {
 
       {/* Edit Exam Modal */}
       {showEditModal && editingExam && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl my-8">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl my-8 glass-panel-glow">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Edit2 className="w-5 h-5 text-blue-400" />
-                Edit Exam ({editingExam.exam_code})
+                <span>Modify Examination ({editingExam.exam_code})</span>
               </h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleEditExam} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                   Title
                 </label>
                 <input
@@ -483,7 +492,7 @@ export default function ExamManagement() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                   Subject
                 </label>
                 <input
@@ -497,7 +506,7 @@ export default function ExamManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Start Time
                   </label>
                   <input
@@ -508,7 +517,7 @@ export default function ExamManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     End Time
                   </label>
                   <input
@@ -522,7 +531,7 @@ export default function ExamManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                     Duration (Minutes)
                   </label>
                   <input
@@ -533,8 +542,8 @@ export default function ExamManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Max Violations Allowed
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
+                    Violation Strikes Limit
                   </label>
                   <input
                     type="number"
@@ -546,14 +555,14 @@ export default function ExamManagement() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
                   Replace Question Paper PDF (Optional)
                 </label>
                 <input
                   type="file"
                   accept=".pdf"
                   onChange={(e) => setPaperFile(e.target.files[0])}
-                  className="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-white"
+                  className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white cursor-pointer"
                 />
               </div>
 
@@ -561,14 +570,14 @@ export default function ExamManagement() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-medium text-slate-300"
+                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white shadow-lg shadow-blue-500/25"
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-blue-500/25 cursor-pointer"
                 >
                   {submitting ? 'Updating...' : 'Save Changes'}
                 </button>
