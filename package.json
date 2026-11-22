@@ -1,0 +1,25 @@
+{
+  "name": "smart-exam-security",
+  "version": "1.0.0",
+  "description": "High-Concurrency Smart Examination Platform with Anti-Malpractice Forensics and Dynamic Watermarking",
+  "scripts": {
+    "install:server": "cd server && npm install",
+    "install:client": "cd client && npm install",
+    "install:all": "npm run install:server && npm run install:client",
+    "build:client": "cd client && npm run build",
+    "build": "npm run build:client",
+    "seed": "node server/seed.js",
+    "start": "node server/server.js",
+    "test": "node server/run_tests.js"
+  },
+  "keywords": [
+    "exam",
+    "college",
+    "anti-cheating",
+    "watermark",
+    "pdf-security",
+    "proctoring"
+  ],
+  "author": "Smart Exam Team",
+  "license": "MIT"
+}

@@ -1,0 +1,51 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj
+4 0 obj << /Length 408 >> stream
+BT
+/F1 20 Tf
+50 720 Td
+(COLLEGE OF ENGINEERING & TECHNOLOGY) Tj
+/F1 14 Tf
+0 -30 Td
+(DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING) Tj
+0 -24 Td
+(CS8591 - COMPUTER NETWORKS - SEMESTER EXAMINATION) Tj
+/F1 12 Tf
+0 -40 Td
+(Time: 3 Hours) Tj
+350 0 Td
+(Maximum Marks: 100) Tj
+-350 -40 Td
+(PART A - Answer All Questions [10 x 2 = 20 Marks]) Tj
+0 -25 Td
+(1. What is the primary difference between OSI and TCP/IP reference models?) Tj
+0 -25 Td
+(2. Explain the purpose of Hamming distance in error detection.) Tj
+0 -25 Td
+(3. Define Piggybacking and its advantages in data communication.) Tj
+0 -25 Td
+(4. Distinguish between Distance Vector and Link State Routing Algorithms.) Tj
+0 -25 Td
+(5. What is the role of ARP and RARP protocols in IPv4 networks?) Tj
+0 -40 Td
+(PART B - Answer Either (a) or (b) [5 x 16 = 80 Marks]) Tj
+0 -25 Td
+(6. (a) Explain CSMA/CD protocol and how collision detection works in Ethernet.) Tj
+ET
+endstream
+endobj
+5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000244 00000 n 
+0000000704 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+775
+%%EOF
