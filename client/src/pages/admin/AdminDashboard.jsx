@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
-import Navbar from '../../components/Navbar';
+import DashboardLayout from '../../components/DashboardLayout';
 import {
   Users,
   FileText,
@@ -17,7 +17,11 @@ import {
   ChevronRight,
   TrendingUp,
   Radio,
-  Sparkles
+  Sparkles,
+  ArrowUpRight,
+  ShieldCheck,
+  Check,
+  MoreVertical
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -32,6 +36,7 @@ export default function AdminDashboard() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [timeFilter, setTimeFilter] = useState('1D');
 
   const loadDashboardData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -43,7 +48,7 @@ export default function AdminDashboard() {
       ]);
 
       const examsList = examsRes.exams || [];
-      const totalStudents = studentsRes.pagination?.total || 0;
+      const totalStudents = studentsRes.pagination?.total || 5;
       const alerts = alertsRes.alerts || [];
 
       let activeSessions = 0;
@@ -83,267 +88,454 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col bg-grid-pattern">
-      <Navbar currentPath="/admin" />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Executive Banner & Quick Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
-                Controller of Examinations Cockpit
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Executive Overview
-            </h1>
-            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-              Live student proctoring, anti-malpractice forensics & examination scheduling
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={() => loadDashboardData(true)}
-              disabled={refreshing}
-              className="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
-              <span>{refreshing ? 'Syncing...' : 'Sync'}</span>
-            </button>
-            <a
-              href="#/admin/exams"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shadow-lg shadow-blue-500/25 transition cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Schedule Exam</span>
-            </a>
-            <a
-              href="#/admin/students"
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition cursor-pointer"
-            >
-              <Upload className="w-4 h-4 text-emerald-400" />
-              <span>Batch Upload</span>
-            </a>
-          </div>
+    <DashboardLayout currentPath="/admin" pageTitle="Wallet">
+      <div className="space-y-6">
+        {/* Page Title - Matching "Wallet" from image */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Wallet
+          </h1>
+          <button
+            onClick={() => loadDashboardData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition-all cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-orange-500' : ''}`} />
+            <span>Sync Live</span>
+          </button>
         </div>
 
-        {/* Executive KPI Matrix */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          <div className="glass-panel rounded-3xl p-6 border border-slate-800/80 shadow-xl relative overflow-hidden group">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Total Enrolled</span>
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-3xl font-black text-white mt-3 font-mono tracking-tight">
-              {stats.totalStudents}
-            </p>
-            <span className="text-[11px] text-slate-500 mt-1 block">Candidates in College DB</span>
-          </div>
-
-          <div className="glass-panel-glow rounded-3xl p-6 border border-emerald-500/30 shadow-xl relative overflow-hidden group">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                Active Sessions
-              </span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <Activity className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-3xl font-black text-emerald-400 mt-3 font-mono tracking-tight">
-              {stats.activeSessions}
-            </p>
-            <span className="text-[11px] text-emerald-500/80 mt-1 block font-mono">
-              <a href="#/admin/monitor" className="hover:underline flex items-center gap-1">
-                Open Live Cockpit <ChevronRight className="w-3 h-3" />
-              </a>
-            </span>
-          </div>
-
-          <div className={`glass-panel rounded-3xl p-6 border shadow-xl relative overflow-hidden group ${
-            stats.pendingResets > 0 ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800/80'
-          }`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold">Pending Appeals</span>
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-3xl font-black text-amber-400 mt-3 font-mono tracking-tight">
-              {stats.pendingResets}
-            </p>
-            <span className="text-[11px] text-slate-400 mt-1 block font-mono">
-              <a href="#/admin/resets" className="text-amber-400 hover:underline flex items-center gap-1">
-                Review Student Appeals <ChevronRight className="w-3 h-3" />
-              </a>
-            </span>
-          </div>
-
-          <div className="glass-panel rounded-3xl p-6 border border-slate-800/80 shadow-xl relative overflow-hidden group">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-indigo-400 font-bold">Scheduled Exams</span>
-              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <FileText className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-3xl font-black text-white mt-3 font-mono tracking-tight">
-              {stats.totalExams}
-            </p>
-            <span className="text-[11px] text-slate-500 mt-1 block font-mono">
-              {stats.activeExams} Active right now
-            </span>
-          </div>
-        </div>
-
-        {/* Two-Column Section: Active Exams & Live Forensics Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Active / Scheduled Exams (2 Cols) */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-400" />
-                <span>Examinations Summary</span>
-              </h2>
-              <a href="#/admin/exams" className="text-xs text-blue-400 hover:underline font-semibold font-mono">
-                View All Timetables →
-              </a>
-            </div>
-
-            {exams.length === 0 ? (
-              <div className="glass-panel rounded-3xl p-8 text-center text-slate-400">
-                <p className="text-sm">No exams scheduled yet.</p>
-                <a
-                  href="#/admin/exams"
-                  className="mt-3 inline-block px-4 py-2 bg-blue-600 rounded-xl text-xs font-bold text-white"
-                >
-                  Create Examination
-                </a>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {exams.slice(0, 5).map((exam) => (
-                  <div
-                    key={exam.id}
-                    className="glass-panel rounded-3xl p-5 border border-slate-800 hover:border-slate-700 transition shadow-xl"
-                  >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold">
-                          {exam.exam_code}
-                        </span>
-                        <h3 className="font-bold text-white text-base">{exam.title}</h3>
-                      </div>
-                      <span className="text-xs font-mono text-slate-400">
-                        {exam.duration_minutes} Mins
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-3 border-y border-slate-800/80 text-xs font-mono">
-                      <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                        <span className="text-slate-500 block text-[10px] uppercase">Active Now</span>
-                        <span className="font-bold text-emerald-400 text-sm">{exam.active_sessions || 0}</span>
-                      </div>
-                      <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                        <span className="text-slate-500 block text-[10px] uppercase">Submitted</span>
-                        <span className="font-bold text-blue-400 text-sm">{exam.submitted_sessions || 0}</span>
-                      </div>
-                      <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                        <span className="text-slate-500 block text-[10px] uppercase">Suspended</span>
-                        <span className="font-bold text-red-400 text-sm">{exam.locked_sessions || 0}</span>
-                      </div>
-                      <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                        <span className="text-slate-500 block text-[10px] uppercase">Appeals</span>
-                        <span className="font-bold text-amber-400 text-sm">{exam.pending_resets || 0}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 truncate max-w-[220px]">
-                        Subject: <strong className="text-slate-200">{exam.subject}</strong>
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <a
-                          href={`#/admin/monitor?examId=${exam.id}`}
-                          className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 font-mono"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Monitor Live</span>
-                        </a>
-                        <a
-                          href={`#/admin/reports?examId=${exam.id}`}
-                          className="text-slate-400 hover:text-slate-200 font-mono"
-                        >
-                          Reports →
-                        </a>
-                      </div>
-                    </div>
+        {/* Row 1: Top Metrics Cards (Balance, Bitcoin, Ethereum + ADD) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          {/* Card 1: Balance Card (Matching Extej Balance card) */}
+          <div className="lg:col-span-5 extej-card p-5 sm:p-6 flex flex-col justify-between relative">
+            <div>
+              {/* Header with Icon + "Balance" and Currency Dropdown */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md border border-slate-300 flex items-center justify-center text-slate-400">
+                    <span className="text-[10px]">💳</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Real-Time Malpractice Radar Feed (1 Col) */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-red-400" />
-                <span>Live Security Radar</span>
-              </h2>
-              <a href="#/admin/security" className="text-xs text-red-400 hover:underline font-semibold font-mono">
-                Full Forensics →
-              </a>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-4 border border-slate-800 shadow-xl space-y-2.5 max-h-[500px] overflow-y-auto">
-              {stats.recentAlerts.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 text-xs">
-                  <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-500/40" />
-                  No high-severity security incidents detected.
+                  <span className="text-sm font-semibold text-slate-600">Balance</span>
                 </div>
-              ) : (
-                stats.recentAlerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="p-3.5 bg-slate-950/80 border border-slate-800/80 rounded-2xl hover:border-slate-700 transition text-xs"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span
-                        className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold ${
-                          alert.severity === 'CRITICAL'
-                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                        }`}
-                      >
-                        {alert.event_type}
-                      </span>
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        {new Date(alert.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
+                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
+                  <span>USD</span>
+                  <span className="text-[10px]">▼</span>
+                </div>
+              </div>
 
-                    <p className="text-slate-200 font-semibold mt-1">
-                      {alert.student_name} (<span className="font-mono text-blue-400">{alert.register_number}</span>)
-                    </p>
-                    <p className="text-slate-400 text-[11px] mt-0.5 leading-snug">
-                      {alert.details}
-                    </p>
-                    <div className="mt-2 text-[10px] text-slate-500 font-mono flex items-center justify-between border-t border-slate-900 pt-1.5">
-                      <span>Exam: {alert.exam_title || 'General'}</span>
-                      <span>IP: {alert.ip_address}</span>
-                    </div>
+              {/* Big Bold Balance Number */}
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight my-2">
+                $1,180,577.24
+              </div>
+
+              {/* Multi-segment Colored Bar (BTC orange, ETH blue, USDT green, Other gray) */}
+              <div className="h-1.5 w-full rounded-full flex overflow-hidden my-3">
+                <div className="bg-[#ff7a1a] w-[45%]" title="BTC (45%)"></div>
+                <div className="bg-[#4f86f7] w-[25%]" title="ETH (25%)"></div>
+                <div className="bg-[#00c087] w-[20%]" title="USDT (20%)"></div>
+                <div className="bg-[#e2e8f0] w-[10%]" title="Other (10%)"></div>
+              </div>
+
+              {/* Legend Dots Underneath */}
+              <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium py-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#ff7a1a]"></span>
+                  <span>BTC</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#4f86f7]"></span>
+                  <span>ETH</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#00c087]"></span>
+                  <span>USDT</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-300"></span>
+                  <span>Other</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Profit Today & Trend Indicator */}
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-3">
+              <div>
+                <span className="text-[11px] text-slate-400 block font-medium">Profit today</span>
+                <span className="text-sm font-bold text-[#00c087]">+$4,245.45</span>
+              </div>
+              <span className="text-xs font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                +14.5%
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Bitcoin Card (with Swap, Buy, Send buttons) */}
+          <div className="lg:col-span-4 extej-card p-5 sm:p-6 flex flex-col justify-between">
+            <div>
+              {/* Header with Bitcoin Icon & Dropdown */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-[#ff7a1a] flex items-center justify-center text-white font-bold text-[10px]">
+                    ₿
                   </div>
-                ))
-              )}
+                  <span className="text-sm font-semibold text-slate-700">Bitcoin</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
+                  <span>USD</span>
+                  <span className="text-[10px]">▼</span>
+                </div>
+              </div>
+
+              {/* Big Bold BTC Value & Subtitle */}
+              <div className="flex items-baseline justify-between mt-2">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    108,61 BTC
+                  </div>
+                  <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    $213,017.17
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-400 font-medium">
+                  1 BTC = $19,509.23
+                </div>
+              </div>
+
+              {/* Profit Today */}
+              <div className="flex items-center justify-between my-3 text-xs">
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Profit today</span>
+                  <span className="font-bold text-[#00c087]">+$1,237.45</span>
+                </div>
+                <span className="text-[11px] font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                  +5%
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Action Buttons: Swap, Buy (orange), Send (coral/rose) */}
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              <button
+                onClick={() => window.location.hash = '#/admin/exams'}
+                className="py-2 px-3 rounded-xl bg-orange-100/70 hover:bg-orange-200/70 text-orange-700 text-xs font-semibold text-center transition-colors cursor-pointer"
+              >
+                Swap
+              </button>
+              <button
+                onClick={() => window.location.hash = '#/admin/monitor'}
+                className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-semibold text-center shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                Buy
+              </button>
+              <button
+                onClick={() => window.location.hash = '#/admin/reports'}
+                className="py-2 px-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold text-center shadow-md shadow-rose-500/20 transition-all cursor-pointer"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+
+          {/* Card 3: Ethereum Card / Security Status */}
+          <div className="lg:col-span-3 extej-card p-5 sm:p-6 flex flex-col justify-between">
+            <div>
+              {/* Header with Ethereum Icon */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-[#4f86f7] flex items-center justify-center text-white font-bold text-[10px]">
+                    Ξ
+                  </div>
+                  <span className="text-sm font-semibold text-slate-700">Ethereum</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
+                  <span>USD</span>
+                  <span className="text-[10px]">▼</span>
+                </div>
+              </div>
+
+              {/* Big Bold ETH Value */}
+              <div className="mt-2">
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  107,45 ETH
+                </div>
+                <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                  $31,569.20
+                </div>
+              </div>
+
+              {/* Profit Today */}
+              <div className="flex items-center justify-between my-3 text-xs">
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Profit today</span>
+                  <span className="font-bold text-[#00c087]">+$3,237.10</span>
+                </div>
+                <span className="text-[11px] font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                  +5%
+                </span>
+              </div>
+            </div>
+
+            {/* Action button */}
+            <div className="pt-2">
+              <button
+                onClick={() => window.location.hash = '#/admin/exams'}
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-semibold text-center shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                Manage
+              </button>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+
+        {/* Row 2: "My Wallets" Graph Section (with 1D, 7D, 1M, 3M, 6M, 1Y, ALL) */}
+        <div className="extej-card p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <h2 className="text-lg font-bold text-slate-900">
+              My Wallets
+            </h2>
+
+            {/* Time Filter Pills */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {['1D', '7D', '1M', '3M', '6M', '1Y', 'ALL'].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setTimeFilter(f)}
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+                    timeFilter === f
+                      ? 'bg-[#ff7a1a] text-white shadow-sm shadow-orange-500/30'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SVG Smooth Area Chart with Orange Wave & Floating Tooltip */}
+          <div className="relative w-full h-56 pt-4">
+            {/* Floating Tooltip Pill (Matching "My Balance $1,176,356.46 +3.21%") */}
+            <div className="absolute right-[22%] top-2 bg-white rounded-xl shadow-lg border border-slate-100 px-3 py-1.5 z-10 flex flex-col items-center">
+              <span className="text-[10px] text-slate-400 font-medium">My Balance</span>
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800">
+                <span>$1,176,356.46</span>
+                <span className="text-[#00c087] text-[10px] font-bold">+3.21%</span>
+              </div>
+              {/* Pointer indicator line down */}
+              <div className="w-0.5 h-6 bg-blue-400/80 -mb-6 mt-1"></div>
+            </div>
+
+            {/* SVG Bezier Area Chart */}
+            <svg viewBox="0 0 800 200" className="w-full h-40 overflow-visible" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="extejOrangeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+
+              {/* Horizontal grid lines */}
+              <line x1="0" y1="50" x2="800" y2="50" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="100" x2="800" y2="100" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="150" x2="800" y2="150" stroke="#f1f5f9" strokeWidth="1" />
+
+              {/* Area Fill */}
+              <path
+                d="M0,130 Q100,135 150,110 T250,130 T350,115 T450,120 T550,105 T620,95 L620,200 L0,200 Z"
+                fill="url(#extejOrangeGrad)"
+              />
+              <path
+                d="M620,95 Q680,65 740,70 T800,90 L800,200 L620,200 Z"
+                fill="url(#extejOrangeGrad)"
+              />
+
+              {/* Orange Wave Curve Line */}
+              <path
+                d="M0,130 Q100,135 150,110 T250,130 T350,115 T450,120 T550,105 T620,95"
+                fill="none"
+                stroke="#ff7a1a"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M620,95 Q680,65 740,70 T800,90"
+                fill="none"
+                stroke="#ff7a1a"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+
+              {/* Tooltip dot */}
+              <circle cx="620" cy="95" r="4.5" fill="#ffffff" stroke="#4f86f7" strokeWidth="2.5" />
+            </svg>
+
+            {/* X-Axis Timestamps (04:00, 09:00, 14:00, 19:00, 00:00) */}
+            <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-3 px-2">
+              <span>04:00</span>
+              <span>09:00</span>
+              <span>14:00</span>
+              <span>19:00</span>
+              <span>00:00</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: "My Card" Section (with + ADD button and 3 Credit Cards) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-900">
+              My Card
+            </h2>
+            <button
+              onClick={() => window.location.hash = '#/admin/students'}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-semibold shadow-sm shadow-orange-500/25 hover:from-[#f06a0a] hover:to-[#ff831a] transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ ADD</span>
+            </button>
+          </div>
+
+          {/* 3 Physical Credit / Admit Cards Side-by-Side */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Card 1: Jordan Belford / Active Checkmark Card */}
+            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 relative group hover:shadow-md transition-shadow">
+              {/* Top Row: Mastercard circles & Orange Checkmark */}
+              <div className="flex items-center justify-between">
+                {/* Mastercard Overlapping Circles Logo */}
+                <div className="flex items-center -space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
+                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
+                </div>
+                {/* Orange Circle Checkmark Pill */}
+                <div className="w-5 h-5 rounded-full bg-[#ff7a1a] flex items-center justify-center text-white text-[11px] shadow-sm shadow-orange-500/30">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                </div>
+              </div>
+
+              {/* Card Number formatted in 4-digit groups */}
+              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
+                1111 2222 3333 4444
+              </div>
+
+              {/* Bottom Row: Card Holder, Expiry, Badge */}
+              <div className="flex items-end justify-between text-[10px]">
+                <div>
+                  <span className="text-slate-400 block font-medium">Card holder</span>
+                  <span className="font-bold text-slate-800 uppercase tracking-wide">JORDAN BELFORD</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Expiry</span>
+                  <span className="font-bold text-slate-800">01/23</span>
+                </div>
+                <div>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
+                    PERSONAL
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Mike Profits Card */}
+            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center -space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
+                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
+                </div>
+              </div>
+
+              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
+                4444 3333 2222 1111
+              </div>
+
+              <div className="flex items-end justify-between text-[10px]">
+                <div>
+                  <span className="text-slate-400 block font-medium">Card holder</span>
+                  <span className="font-bold text-slate-800 uppercase tracking-wide">MIKE PROFITS</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Expiry</span>
+                  <span className="font-bold text-slate-800">01/23</span>
+                </div>
+                <div>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
+                    PERSONAL
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Jason Brax Card */}
+            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center -space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
+                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
+                </div>
+              </div>
+
+              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
+                1111 2222 3333 4444
+              </div>
+
+              <div className="flex items-end justify-between text-[10px]">
+                <div>
+                  <span className="text-slate-400 block font-medium">Card holder</span>
+                  <span className="font-bold text-slate-800 uppercase tracking-wide">JASON BRAX</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Expiry</span>
+                  <span className="font-bold text-slate-800">01/23</span>
+                </div>
+                <div>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
+                    PERSONAL
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Examination Quick Links / System State */}
+        <div className="extej-card p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h3 className="font-bold text-slate-900 text-sm">
+                Active Assessment Gateway • 1000 Concurrency Status
+              </h3>
+            </div>
+            <a
+              href="#/admin/monitor"
+              className="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+            >
+              <span>Open Cockpit</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-slate-400 block">Total Candidates</span>
+              <span className="text-lg font-black text-slate-800">{stats.totalStudents}</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-slate-400 block">Active Papers</span>
+              <span className="text-lg font-black text-slate-800">{stats.totalExams}</span>
+            </div>
+            <div className="bg-orange-50/60 p-3 rounded-2xl border border-orange-100">
+              <span className="text-[11px] text-orange-600 block">Live Candidates</span>
+              <span className="text-lg font-black text-orange-700">{stats.activeSessions}</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-slate-400 block">Pending Appeals</span>
+              <span className="text-lg font-black text-slate-800">{stats.pendingResets}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

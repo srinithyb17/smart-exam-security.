@@ -12,55 +12,81 @@
     -moz-user-select: none;
     -ms-user-select: none;
     overflow-x: hidden;
-    background-color: #030712;
-    color: #f1f5f9;
+    background-color: #f4f6fa;
+    color: #1e293b;
     font-family: var(--font-sans);
   }
 
-  /* Custom sleek scrollbars */
+  /* Sleek modern scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #090d16;
+    background: #f1f5f9;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #cbd5e1;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #94a3b8;
   }
 }
 
-/* Background Grids & Technical Patterns */
-.bg-grid-pattern {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+/* Extej Card Styling */
+.extej-card {
+  background-color: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease-in-out;
 }
 
-.bg-dot-pattern {
-  background-size: 24px 24px;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+.extej-card:hover {
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
 }
 
-/* Glassmorphism Cards */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+.extej-card-active {
+  background-color: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 122, 26, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 122, 26, 0.08);
 }
 
-.glass-panel-glow {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 0 30px -10px rgba(59, 130, 246, 0.15);
+/* Orange gradient button & pills */
+.btn-orange-primary {
+  background: linear-gradient(135deg, #ff7a1a 0%, #ff9533 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 122, 26, 0.35);
+  transition: all 0.2s ease-in-out;
+}
+.btn-orange-primary:hover {
+  background: linear-gradient(135deg, #f06a0a 0%, #ff831a 100%);
+  box-shadow: 0 6px 20px rgba(255, 122, 26, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Credit / Admit Card Style */
+.smart-admit-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.smart-admit-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 122, 26, 0.06) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 /* Watermark styles */
@@ -71,7 +97,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   grid-gap: 40px;
-  opacity: 0.14;
+  opacity: 0.12;
   overflow: hidden;
   z-index: 30;
 }

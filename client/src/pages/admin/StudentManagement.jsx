@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
-import Navbar from '../../components/Navbar';
+import DashboardLayout from '../../components/DashboardLayout';
 import {
   Users,
   UserPlus,
@@ -13,7 +13,8 @@ import {
   AlertCircle,
   CheckCircle,
   FileSpreadsheet,
-  GraduationCap
+  GraduationCap,
+  Plus
 } from 'lucide-react';
 
 export default function StudentManagement() {
@@ -59,27 +60,36 @@ export default function StudentManagement() {
       });
       const data = await api.get(`/students?${params.toString()}`);
       setStudents(data.students || []);
-      setDepartments(data.departments || []);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalStudents(data.pagination?.total || 0);
     } catch (err) {
-      console.error('Failed to fetch students:', err);
+      console.error('Failed to load students:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchStudents();
-  }, [page, selectedDept]);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setPage(1);
-    fetchStudents();
+  const fetchDepartments = async () => {
+    try {
+      const data = await api.get('/students/departments');
+      setDepartments(data.departments || []);
+    } catch (err) {
+      console.error('Failed to load departments:', err);
+    }
   };
 
-  const handleAddStudent = async (e) => {
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchStudents();
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [search, selectedDept, page]);
+
+  const handleCreateStudent = async (e) => {
     e.preventDefault();
     try {
       await api.post('/students', studentForm);
@@ -95,11 +105,11 @@ export default function StudentManagement() {
       });
       fetchStudents();
     } catch (err) {
-      alert(err.message || 'Failed to add student');
+      alert(err.message || 'Failed to create student');
     }
   };
 
-  const handleEditStudent = async (e) => {
+  const handleUpdateStudent = async (e) => {
     e.preventDefault();
     try {
       await api.put(`/students/${editingStudent.id}`, editingStudent);
@@ -112,7 +122,7 @@ export default function StudentManagement() {
   };
 
   const handleDeleteStudent = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete student "${name}"?`)) return;
+    if (!window.confirm(`Delete candidate ${name}? This action cannot be reversed.`)) return;
     try {
       await api.delete(`/students/${id}`);
       fetchStudents();
@@ -127,160 +137,133 @@ export default function StudentManagement() {
     setBulkUploading(true);
     setBulkResult(null);
 
-    try {
-      const formData = new FormData();
-      formData.append('file', bulkFile);
-      const res = await fetch('/api/students/bulk-upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('smart_exam_token')}`
-        },
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Bulk upload failed');
+    const formData = new FormData();
+    formData.append('file', bulkFile);
 
-      setBulkResult(data);
+    try {
+      const res = await api.upload('/students/bulk', formData);
+      setBulkResult(res);
       fetchStudents();
     } catch (err) {
-      alert(err.message || 'Bulk upload failed');
+      alert(err.message || 'Failed to process bulk CSV');
     } finally {
       setBulkUploading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col bg-grid-pattern">
-      <Navbar currentPath="/admin/students" />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <DashboardLayout currentPath="/admin/students" pageTitle="Candidates">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-              <span className="text-xs font-mono uppercase tracking-widest text-blue-400 font-bold">
-                Student Administration
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Candidate Directory
-              </h1>
-              <span className="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono font-bold">
-                {totalStudents} Enrolled
-              </span>
-            </div>
-            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-              Manage register numbers, candidate credentials, department cohorts and bulk batch imports
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Candidate Directory & Enrollment
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Manage eligible students, configure credentials, and batch import college rosters via CSV
             </p>
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => { setShowBulkModal(true); setBulkResult(null); setBulkFile(null); }}
-              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-lg"
+              onClick={() => { setBulkResult(null); setBulkFile(null); setShowBulkModal(true); }}
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Upload className="w-4 h-4 text-emerald-400" />
-              <span>Bulk CSV Import</span>
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>Import CSV</span>
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-blue-500/25 transition cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <UserPlus className="w-4 h-4" />
-              <span>Add Candidate</span>
+              <Plus className="w-4 h-4" />
+              <span>+ Add Candidate</span>
             </button>
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="glass-panel border border-slate-800 rounded-3xl p-4 mb-6 shadow-xl flex flex-col sm:flex-row items-center gap-4">
-          <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        {/* Filter Bar */}
+        <div className="extej-card p-4 flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by Register Number, Candidate Name, or Email..."
+              placeholder="Search by register number, student name, or email..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 font-medium"
             />
-          </form>
+          </div>
 
           <select
             value={selectedDept}
             onChange={(e) => { setSelectedDept(e.target.value); setPage(1); }}
-            className="px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono cursor-pointer w-full sm:w-auto"
+            className="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-orange-500 w-full sm:w-auto font-medium cursor-pointer"
           >
             <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d} value={d}>{d}</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
             ))}
           </select>
         </div>
 
-        {/* Candidates Table */}
-        <div className="glass-panel border border-slate-800 rounded-3xl shadow-xl overflow-hidden">
+        {/* Candidate Table */}
+        <div className="extej-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950/80 text-slate-400 font-mono uppercase tracking-wider border-b border-slate-800/80">
-                <tr>
-                  <th className="py-3.5 px-4">Register Number</th>
-                  <th className="py-3.5 px-4">Candidate Name</th>
-                  <th className="py-3.5 px-4">Department</th>
-                  <th className="py-3.5 px-4">Standing</th>
-                  <th className="py-3.5 px-4">Email</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="py-3 px-4">Register Number</th>
+                  <th className="py-3 px-4">Candidate Name</th>
+                  <th className="py-3 px-4">Department & Class</th>
+                  <th className="py-3 px-4">Email</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
+              <tbody className="divide-y divide-slate-100 text-xs">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-slate-500 font-mono">
-                      Querying candidate records...
+                    <td colSpan="5" className="py-12 text-center text-slate-400">
+                      Loading candidate database...
                     </td>
                   </tr>
                 ) : students.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-slate-500">
-                      No candidates found matching current filter query.
+                    <td colSpan="5" className="py-12 text-center text-slate-400">
+                      No candidates found matching the query.
                     </td>
                   </tr>
                 ) : (
-                  students.map((st) => (
-                    <tr key={st.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3.5 px-4 font-mono font-bold text-white">
-                        {st.register_number}
+                  students.map((student) => (
+                    <tr key={student.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
+                        {student.register_number}
                       </td>
-                      <td className="py-3.5 px-4 font-semibold text-slate-200">
-                        {st.name}
+                      <td className="py-3.5 px-4 font-semibold text-slate-900">
+                        {student.name}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono text-[11px] font-semibold">
-                          {st.department || 'N/A'}
-                        </span>
+                      <td className="py-3.5 px-4 text-slate-500">
+                        <span className="font-semibold text-slate-700">{student.department}</span> • Yr {student.year} / Sec {student.section}
                       </td>
                       <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
-                        Year {st.year || 'IV'} / Sec {st.section || 'A'}
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
-                        {st.email || '—'}
+                        {student.email || '—'}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => { setEditingStudent(st); setShowEditModal(true); }}
-                            className="p-2 rounded-xl bg-slate-900 hover:bg-blue-600 hover:text-white text-slate-400 transition cursor-pointer border border-slate-800"
-                            title="Edit Candidate Details"
+                            onClick={() => { setEditingStudent(student); setShowEditModal(true); }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                            title="Edit Candidate"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteStudent(st.id, st.name)}
-                            className="p-2 rounded-xl bg-slate-900 hover:bg-red-600 hover:text-white text-slate-400 transition cursor-pointer border border-slate-800"
-                            title="Delete Candidate Record"
+                            onClick={() => handleDeleteStudent(student.id, student.name)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Delete Candidate"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -291,147 +274,115 @@ export default function StudentManagement() {
             </table>
           </div>
 
-          {/* Pagination Footer */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
-              <span>Page {page} of {totalPages}</span>
-              <div className="flex gap-2">
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage(p => Math.max(p - 1, 1))}
-                  className="px-3 py-1.5 bg-slate-800 rounded-xl hover:bg-slate-700 disabled:opacity-30 cursor-pointer font-bold"
-                >
-                  Previous
-                </button>
-                <button
-                  disabled={page >= totalPages}
-                  onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-                  className="px-3 py-1.5 bg-slate-800 rounded-xl hover:bg-slate-700 disabled:opacity-30 cursor-pointer font-bold"
-                >
-                  Next
-                </button>
-              </div>
+          {/* Pagination */}
+          <div className="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Total: <strong>{totalStudents}</strong> candidates registered</span>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(page - 1)}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+              >
+                Previous
+              </button>
+              <span className="px-2 text-slate-600 font-bold">{page} / {totalPages}</span>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage(page + 1)}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+              >
+                Next
+              </button>
             </div>
-          )}
+          </div>
         </div>
-      </main>
+      </div>
 
       {/* Add Candidate Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl glass-panel-glow">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-blue-400" />
-                <span>Register New Candidate</span>
-              </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddStudent} className="space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="extej-card max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <h3 className="text-base font-bold text-slate-900 mb-4">
+              Add New Candidate
+            </h3>
+            <form onSubmit={handleCreateStudent} className="space-y-3.5">
               <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Register Number *
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Register Number</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. 910021104050"
+                  placeholder="e.g. 910021104006"
                   value={studentForm.register_number}
                   onChange={(e) => setStudentForm({ ...studentForm, register_number: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:bg-white focus:border-orange-500"
                 />
               </div>
-
               <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Candidate Full Name *
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. John Doe"
+                  placeholder="e.g. Alex Henderson"
                   value={studentForm.name}
                   onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-orange-500"
                 />
               </div>
-
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Dept
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Dept</label>
                   <input
                     type="text"
+                    required
                     value={studentForm.department}
                     onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Year
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Year</label>
                   <input
                     type="text"
+                    required
                     value={studentForm.year}
                     onChange={(e) => setStudentForm({ ...studentForm, year: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Sec
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Section</label>
                   <input
                     type="text"
+                    required
                     value={studentForm.section}
                     onChange={(e) => setStudentForm({ ...studentForm, section: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-orange-500"
                   />
                 </div>
               </div>
-
               <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Email Address
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
                 <input
-                  type="email"
-                  placeholder="student@clg.edu"
-                  value={studentForm.email}
-                  onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Initial Password (Defaults to Reg No)
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
+                  type="text"
+                  required
+                  placeholder="Set initial password"
                   value={studentForm.password}
                   onChange={(e) => setStudentForm({ ...studentForm, password: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-orange-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3">
+              <div className="flex items-center gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-blue-500/25 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-bold shadow-md shadow-orange-500/25"
                 >
                   Save Candidate
                 </button>
@@ -441,201 +392,52 @@ export default function StudentManagement() {
         </div>
       )}
 
-      {/* Edit Candidate Modal */}
-      {showEditModal && editingStudent && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl glass-panel-glow">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Edit2 className="w-5 h-5 text-blue-400" />
-                <span>Modify Candidate Details</span>
-              </h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleEditStudent} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Register Number
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.register_number}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, register_number: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Candidate Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editingStudent.name}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Dept
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStudent.department || ''}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, department: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Year
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStudent.year || ''}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, year: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                    Sec
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStudent.section || ''}
-                    onChange={(e) => setEditingStudent({ ...editingStudent, section: e.target.value })}
-                    className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={editingStudent.email || ''}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, email: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 font-mono">
-                  Reset Password (Leave blank to keep unchanged)
-                </label>
-                <input
-                  type="password"
-                  placeholder="New password..."
-                  value={editingStudent.password || ''}
-                  onChange={(e) => setEditingStudent({ ...editingStudent, password: e.target.value })}
-                  className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-blue-500/25 cursor-pointer"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk CSV Import Modal */}
+      {/* CSV Bulk Modal */}
       {showBulkModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl glass-panel-glow">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Upload className="w-5 h-5 text-emerald-400" />
-                <span>Batch Candidate Import (CSV)</span>
-              </h3>
-              <button onClick={() => setShowBulkModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-              Import hundreds of student records in seconds using a CSV spreadsheet. Existing register numbers will be safely skipped.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="extej-card max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              Import Candidates from CSV
+            </h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Upload a comma-separated values (.csv) file containing columns: <code>register_number, name, email, department, year, section, password</code>
             </p>
 
-            <div className="mb-4">
-              <a
-                href="/api/students/sample-csv"
-                download="student_upload_sample.csv"
-                className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:underline font-mono font-semibold"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Sample CSV Format</span>
-              </a>
-            </div>
-
             <form onSubmit={handleBulkUpload} className="space-y-4">
-              <div className="border-2 border-dashed border-slate-700 hover:border-slate-500 rounded-2xl p-7 text-center cursor-pointer bg-slate-950/60">
-                <FileSpreadsheet className="w-10 h-10 text-slate-500 mx-auto mb-2" />
-                <input
-                  type="file"
-                  accept=".csv"
-                  required
-                  onChange={(e) => setBulkFile(e.target.files[0])}
-                  className="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
-                />
-              </div>
+              <input
+                type="file"
+                accept=".csv"
+                required
+                onChange={(e) => setBulkFile(e.target.files[0])}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700"
+              />
 
               {bulkResult && (
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-xs space-y-1 font-mono">
-                  <p className="font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4" />
-                    {bulkResult.message}
-                  </p>
-                  <p className="text-slate-400">
-                    Inserted: <strong className="text-white">{bulkResult.insertedCount}</strong> | Skipped: <strong className="text-white">{bulkResult.skippedCount}</strong>
-                  </p>
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800">
+                  Imported: {bulkResult.importedCount} candidates successfully!
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-3">
+              <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowBulkModal(false)}
-                  className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-semibold text-slate-300 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
-                  disabled={bulkUploading || !bulkFile}
-                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white shadow-lg shadow-emerald-500/25 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  disabled={bulkUploading}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-bold shadow-md shadow-orange-500/25"
                 >
-                  {bulkUploading ? 'Processing CSV Matrix...' : 'Start Batch Import'}
+                  {bulkUploading ? 'Uploading...' : 'Process CSV'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }

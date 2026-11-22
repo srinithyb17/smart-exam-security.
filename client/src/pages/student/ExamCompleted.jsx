@@ -31,8 +31,8 @@ export default function ExamCompleted() {
     // Trigger celebratory confetti
     try {
       confetti({
-        particleCount: 100,
-        spread: 80,
+        particleCount: 80,
+        spread: 70,
         origin: { y: 0.6 }
       });
     } catch (_) {}
@@ -43,81 +43,54 @@ export default function ExamCompleted() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 bg-grid-pattern relative overflow-hidden print:bg-white print:text-black">
-      {/* Background Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none print:hidden"></div>
-
-      <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 text-center shadow-2xl relative z-10 glass-panel-glow print:border-black print:bg-white print:shadow-none">
+    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col items-center justify-center p-4 relative antialiased print:bg-white print:p-0">
+      <div className="max-w-lg w-full extej-card p-8 sm:p-10 text-center shadow-xl relative z-10 print:shadow-none print:border-none">
         {/* Verified Academic Seal */}
-        <div className="relative mx-auto w-24 h-24 mb-6">
-          <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping print:hidden"></div>
-          <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/30 border border-emerald-400/40 print:border-green-700">
-            <CheckCircle2 className="w-12 h-12 text-white" />
-          </div>
+        <div className="mx-auto w-20 h-20 mb-5 rounded-2xl bg-gradient-to-tr from-[#00c087] to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+          <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
 
-        <span className="text-[11px] font-mono uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold mb-3 inline-block">
+        <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3 inline-block">
           Official Digital Receipt
         </span>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2 print:text-black">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
           Examination Submitted!
         </h1>
-        <p className="text-xs text-slate-300 mb-6 leading-relaxed print:text-gray-700">
-          Your examination paper has been sealed and securely recorded in the university evaluation database.
+        <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+          Your answers have been cryptographically sealed and permanently logged into the evaluation database.
         </p>
 
-        {/* Official Receipt Card */}
-        <div className="bg-slate-950/90 rounded-2xl p-5 border border-slate-800 text-left text-xs space-y-2.5 mb-6 font-mono shadow-inner print:bg-gray-50 print:border-gray-300">
-          <div className="flex justify-between items-center pb-2 border-b border-slate-800/80 print:border-gray-300">
-            <span className="text-slate-500 flex items-center gap-1.5 print:text-gray-600">
-              <User className="w-3.5 h-3.5" /> Candidate:
-            </span>
-            <span className="text-white font-bold print:text-black">{user?.name}</span>
+        {/* Receipt Details Card */}
+        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 text-left text-xs space-y-2.5 mb-6 font-mono">
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+            <span className="text-slate-400">Candidate Name:</span>
+            <span className="text-slate-800 font-bold">{user?.name}</span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-slate-800/80 print:border-gray-300">
-            <span className="text-slate-500 flex items-center gap-1.5 print:text-gray-600">
-              <GraduationCap className="w-3.5 h-3.5" /> Register No:
-            </span>
-            <span className="text-emerald-400 font-bold print:text-green-800">{user?.register_number}</span>
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+            <span className="text-slate-400">Register Number:</span>
+            <span className="text-slate-800 font-bold">{user?.register_number}</span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-slate-800/80 print:border-gray-300">
-            <span className="text-slate-500 flex items-center gap-1.5 print:text-gray-600">
-              <Clock className="w-3.5 h-3.5" /> Timestamp:
-            </span>
-            <span className="text-slate-300 print:text-black">{submissionTimestamp}</span>
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+            <span className="text-slate-400">Submission Timestamp:</span>
+            <span className="text-slate-800 font-semibold">{submissionTimestamp}</span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-slate-800/80 print:border-gray-300">
-            <span className="text-slate-500 flex items-center gap-1.5 print:text-gray-600">
-              <ShieldCheck className="w-3.5 h-3.5" /> Integrity Check:
-            </span>
-            <span className="text-blue-400 font-bold print:text-blue-800">Verified & Encrypted</span>
-          </div>
-
-          <div>
-            <span className="text-slate-500 block text-[10px] mb-1 print:text-gray-600">
-              Receipt Cryptographic Hash:
-            </span>
-            <p className="text-[10px] text-slate-400 font-mono break-all bg-slate-900/80 p-2 rounded-lg border border-slate-800/80 print:bg-white print:border-gray-300 print:text-black">
+          <div className="pt-1">
+            <span className="text-slate-400 block text-[10px] mb-1">Receipt Hash:</span>
+            <div className="bg-white p-2 rounded-lg border border-slate-200 text-[10px] text-slate-600 break-all select-all">
               {submissionHash}
-            </p>
+            </div>
           </div>
         </div>
 
-        {/* Security Notice */}
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-400 mb-6 print:text-gray-600">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Paper access has been revoked for this authorized session token.</span>
-        </div>
-
-        {/* Action Controls */}
-        <div className="grid grid-cols-2 gap-3 print:hidden">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3 print:hidden">
           <button
             onClick={handlePrint}
-            className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition cursor-pointer"
+            className="flex-1 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Printer className="w-4 h-4" />
             <span>Print Receipt</span>
@@ -125,10 +98,10 @@ export default function ExamCompleted() {
 
           <a
             href="#/student"
-            className="py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 transition cursor-pointer"
+            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Home className="w-4 h-4" />
-            <span>Dashboard</span>
+            <span>Return Home</span>
           </a>
         </div>
       </div>

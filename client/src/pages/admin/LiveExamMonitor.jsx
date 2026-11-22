@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
-import Navbar from '../../components/Navbar';
+import DashboardLayout from '../../components/DashboardLayout';
 import {
   Eye,
   Activity,
@@ -104,24 +104,16 @@ export default function LiveExamMonitor() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col bg-grid-pattern">
-      <Navbar currentPath="/admin/monitor" />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <DashboardLayout currentPath="/admin/monitor" pageTitle="Live Proctor Cockpit">
+      <div className="space-y-6">
         {/* Header & Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
-                Live Proctoring Cockpit
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Real-Time Candidate Invigilation
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Live Proctoring Cockpit
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-              Instant telemetry: heartbeats, tab switching detection, strike counts & reset appeals
+            <p className="text-xs text-slate-500 mt-1">
+              Real-time student telemetry: heartbeats, focus violations, strikes & appeal handling
             </p>
           </div>
 
@@ -130,7 +122,7 @@ export default function LiveExamMonitor() {
             <select
               value={selectedExamId}
               onChange={(e) => setSelectedExamId(e.target.value)}
-              className="px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-lg"
+              className="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-bold focus:outline-none focus:border-orange-500 cursor-pointer shadow-sm"
             >
               {exams.map((ex) => (
                 <option key={ex.id} value={ex.id}>
@@ -144,33 +136,33 @@ export default function LiveExamMonitor() {
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition cursor-pointer ${
                 autoRefresh
-                  ? 'bg-blue-600/20 border-blue-500/40 text-blue-400 shadow-md shadow-blue-500/10'
-                  : 'bg-slate-900 border-slate-800 text-slate-400'
+                  ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm'
+                  : 'bg-white border-slate-200 text-slate-500'
               }`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${autoRefresh ? 'animate-spin' : ''}`} />
-              <span>Live Sync: {autoRefresh ? '4s' : 'Paused'}</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${autoRefresh ? 'animate-spin text-orange-500' : ''}`} />
+              <span>Sync: {autoRefresh ? '4s' : 'Paused'}</span>
             </button>
           </div>
         </div>
 
         {/* Filters & Candidate Search Bar */}
-        <div className="glass-panel border border-slate-800 rounded-3xl p-4 mb-6 shadow-xl flex flex-col sm:flex-row items-center gap-4">
+        <div className="extej-card p-4 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search candidate by Register Number or Full Name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 font-medium"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto font-mono cursor-pointer"
+            className="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-orange-500 w-full sm:w-auto font-medium cursor-pointer"
           >
             <option value="">All Session Statuses</option>
             <option value="IN_PROGRESS">🟢 In Progress</option>
@@ -182,15 +174,15 @@ export default function LiveExamMonitor() {
 
         {/* Sessions Grid */}
         {loading ? (
-          <div className="text-center py-20 text-slate-500 font-mono text-xs">
+          <div className="text-center py-20 text-slate-400 text-xs">
             Connecting to real-time proctoring telemetry stream...
           </div>
         ) : filteredSessions.length === 0 ? (
-          <div className="glass-panel border border-slate-800 rounded-3xl p-16 text-center text-slate-400">
-            <Activity className="w-12 h-12 mx-auto mb-3 text-slate-600" />
-            <p className="text-base font-bold text-white">Zero Active Candidates Found</p>
+          <div className="extej-card p-16 text-center text-slate-400">
+            <Activity className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+            <p className="text-base font-bold text-slate-800">Zero Active Candidates Found</p>
             <p className="text-xs text-slate-500 mt-1">
-              Candidates who enter this exam session will show up live with real-time heartbeat status and strike counters.
+              Candidates who enter this exam session will show up live with heartbeat status and strike counters.
             </p>
           </div>
         ) : (
@@ -210,60 +202,59 @@ export default function LiveExamMonitor() {
               return (
                 <div
                   key={session.id}
-                  className={`rounded-3xl border p-6 shadow-xl flex flex-col justify-between transition-all glass-panel ${
+                  className={`extej-card p-5 flex flex-col justify-between ${
                     isLocked
-                      ? 'border-red-500/60 bg-red-950/15'
+                      ? 'border-rose-300 bg-rose-50/20'
                       : hasResetRequest
-                      ? 'border-amber-500/60 bg-amber-950/15'
-                      : 'border-slate-800 hover:border-slate-700'
+                      ? 'border-amber-300 bg-amber-50/20'
+                      : 'hover:border-orange-300'
                   }`}
                 >
                   <div>
                     {/* Header: Register No and Status Badge */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono font-bold text-white text-sm bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
+                      <span className="font-mono font-bold text-slate-800 text-xs bg-slate-100 px-2.5 py-1 rounded-xl">
                         {session.register_number}
                       </span>
 
-                      {/* Status Badges */}
                       {isLocked ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[11px] font-bold font-mono flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-bold flex items-center gap-1">
                           <Lock className="w-3 h-3" /> SUSPENDED
                         </span>
                       ) : isSubmitted ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[11px] font-semibold font-mono flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-[11px] font-semibold flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" /> SUBMITTED
                         </span>
                       ) : isInterrupted ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] font-semibold font-mono flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 text-[11px] font-semibold flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> INTERRUPTED
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold font-mono flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] font-bold flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                           ONLINE
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-base font-bold text-white mb-0.5">
+                    <h3 className="text-base font-bold text-slate-900 mb-0.5">
                       {session.student_name}
                     </h3>
-                    <p className="text-xs text-slate-400 font-mono">
+                    <p className="text-xs text-slate-400">
                       {session.department || 'CSE'} • Yr {session.year || 'IV'} / Sec {session.section || 'A'}
                     </p>
 
                     {/* Telemetry Stats Bar */}
-                    <div className="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs font-mono">
-                      <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
-                        <span className="text-[10px] text-slate-500 uppercase block">Strikes</span>
-                        <span className={`font-bold text-sm ${session.violations_count > 0 ? 'text-amber-400' : 'text-slate-300'}`}>
+                    <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <span className="text-[10px] text-slate-400 uppercase block font-semibold">Strikes</span>
+                        <span className={`font-bold text-sm ${session.violations_count > 0 ? 'text-orange-600' : 'text-slate-700'}`}>
                           {session.violations_count} strikes
                         </span>
                       </div>
-                      <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
-                        <span className="text-[10px] text-slate-500 uppercase block">Last Heartbeat</span>
-                        <span className="text-slate-300 text-xs font-semibold">
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <span className="text-[10px] text-slate-400 uppercase block font-semibold">Last Heartbeat</span>
+                        <span className="text-slate-700 text-xs font-semibold">
                           {session.last_heartbeat ? new Date(session.last_heartbeat).toLocaleTimeString() : 'N/A'}
                         </span>
                       </div>
@@ -271,78 +262,45 @@ export default function LiveExamMonitor() {
 
                     {/* Reset Request Appeal Banner */}
                     {hasResetRequest && (
-                      <div className="mt-4 p-3.5 rounded-2xl bg-amber-950/50 border border-amber-500/40 text-xs">
-                        <p className="font-bold text-amber-300 flex items-center gap-1.5 font-mono">
-                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                      <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs">
+                        <p className="font-bold text-amber-800 flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                           Student Unlock Appeal:
                         </p>
-                        <p className="text-slate-200 mt-1 italic leading-relaxed">
+                        <p className="text-slate-700 mt-1 italic">
                           "{session.reset_reason || 'Requesting re-entry'}"
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-1.5 font-mono">
-                          Logged at {new Date(session.reset_requested_at).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Recent Incident Mini-Timeline */}
-                    {recentLogs.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-slate-800/80">
-                        <p className="text-[10px] uppercase font-mono text-slate-500 font-bold mb-1.5">
-                          Recent Incidents
-                        </p>
-                        <div className="space-y-1">
-                          {recentLogs.slice(0, 2).map((log, i) => (
-                            <div key={i} className="text-[11px] text-slate-300 flex items-center justify-between">
-                              <span className="truncate max-w-[170px] text-red-400 font-mono text-[10px] font-semibold">{log.event_type}</span>
-                              <span className="font-mono text-[10px] text-slate-500">
-                                {new Date(log.timestamp).toLocaleTimeString()}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Invigilator Action Controls */}
-                  <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                  {/* Action Buttons */}
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
                     {hasResetRequest ? (
-                      <div className="flex items-center gap-2 w-full">
+                      <>
                         <button
                           onClick={() => handleApproveReset(session.id)}
-                          className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer shadow-lg shadow-emerald-500/20"
+                          className="flex-1 py-1.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
                         >
                           <Check className="w-3.5 h-3.5" />
-                          Approve
+                          <span>Approve</span>
                         </button>
                         <button
                           onClick={() => handleRejectReset(session.id)}
-                          className="flex-1 py-2 px-3 bg-slate-800 hover:bg-red-600 hover:text-white text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1 cursor-pointer"
+                          className="flex-1 py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Reject
+                          Dismiss
                         </button>
-                      </div>
+                      </>
                     ) : (
                       <>
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          IP: {session.ip_address || '127.0.0.1'}
-                        </span>
-                        {isInProgress && (
+                        {!isLocked && !isSubmitted && (
                           <button
                             onClick={() => handleForceLock(session.id, session.student_name)}
-                            className="py-1.5 px-3 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                            className="w-full py-1.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                           >
-                            Lock Session
-                          </button>
-                        )}
-                        {isLocked && (
-                          <button
-                            onClick={() => handleApproveReset(session.id)}
-                            className="py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition cursor-pointer"
-                          >
-                            Unlock Student
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>Force Suspend</span>
                           </button>
                         )}
                       </>
@@ -353,7 +311,7 @@ export default function LiveExamMonitor() {
             })}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
