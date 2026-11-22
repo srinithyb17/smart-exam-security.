@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -11,45 +11,49 @@ import {
   ShieldCheck,
   Search,
   Bell,
-  Mail,
   ChevronRight,
   LogOut,
   Menu,
   X,
-  CreditCard,
+  Clock,
+  Wifi,
+  Lock,
   Cpu,
-  Layers,
-  HelpCircle,
-  BookOpen,
-  Sliders,
-  Sparkles,
-  ExternalLink
+  Shield,
+  GraduationCap
 } from 'lucide-react';
 
-export default function DashboardLayout({ children, currentPath = '', pageTitle = 'Dashboard' }) {
+export default function DashboardLayout({ children, currentPath = '', pageTitle = 'Executive Overview' }) {
   const { user, isAdmin, isStudent, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString());
 
-  // Navigation Links for Admin
-  const adminNavPages = [
-    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard, badge: '1' },
-    { name: 'Live Proctor', path: '/admin/monitor', icon: Eye, badge: 'Live' },
-    { name: 'Exams & Papers', path: '/admin/exams', icon: FileText, badge: '1' },
-    { name: 'Candidates', path: '/admin/students', icon: Users, badge: '1' },
-    { name: 'Reset Appeals', path: '/admin/resets', icon: RotateCcw, badge: null },
-    { name: 'Audit Logs', path: '/admin/security', icon: ShieldAlert, badge: null },
-    { name: 'Reports', path: '/admin/reports', icon: BarChart2, badge: null }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Admin Navigation Links
+  const adminNav = [
+    { name: 'Executive Overview', path: '/admin', icon: LayoutDashboard },
+    { name: 'Live Proctor Cockpit', path: '/admin/monitor', icon: Eye, live: true },
+    { name: 'Exams & Question Papers', path: '/admin/exams', icon: FileText },
+    { name: 'Candidate Directory', path: '/admin/students', icon: Users },
+    { name: 'Unlock Appeals Queue', path: '/admin/resets', icon: RotateCcw },
+    { name: 'Security Audit Logs', path: '/admin/security', icon: ShieldAlert },
+    { name: 'Official Reports & CSV', path: '/admin/reports', icon: BarChart2 }
   ];
 
-  // Navigation Links for Student
-  const studentNavPages = [
-    { name: 'My Assessments', path: '/student', icon: LayoutDashboard, badge: '1' },
-    { name: 'Completed Papers', path: '/completed', icon: ShieldCheck, badge: null }
+  // Student Navigation Links
+  const studentNav = [
+    { name: 'My Examination Schedule', path: '/student', icon: LayoutDashboard },
+    { name: 'Verified Receipts', path: '/completed', icon: ShieldCheck }
   ];
 
-  const currentNav = isAdmin ? adminNavPages : studentNavPages;
+  const currentNav = isAdmin ? adminNav : studentNav;
 
   const isActive = (itemPath) => {
     if (itemPath === '/admin' && (currentPath === '/admin' || currentPath === '/' || currentPath === '')) {
@@ -62,118 +66,105 @@ export default function DashboardLayout({ children, currentPath = '', pageTitle 
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col antialiased">
-      {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200/80 sticky top-0 z-40 h-18 px-4 sm:px-8 flex items-center justify-between">
-        {/* Left Section: Logo & Search */}
-        <div className="flex items-center gap-6 lg:gap-12 flex-1">
-          {/* Logo Mark (Polygonal red/orange crystal icon like Extej) */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col antialiased">
+      {/* Top Navigation Bar */}
+      <header className="bg-white border-b border-slate-200/80 sticky top-0 z-40 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-xs">
+        {/* Left: Brand Identity & Mobile Hamburger */}
+        <div className="flex items-center gap-4 lg:gap-8 flex-1">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
 
-            <a href={isAdmin ? '#/admin' : '#/student'} className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff4d2e] via-[#ff6a1a] to-[#ff8f3d] flex items-center justify-center shadow-md shadow-orange-500/25 group-hover:scale-105 transition-transform">
-                {/* Geometric polygon mark like uploaded Extej logo */}
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-white fill-current">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                </svg>
-              </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xl font-black text-slate-900 tracking-tight">Extej</span>
-                <span className="text-[11px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-200">
-                  Exam
+          <a href={isAdmin ? '#/admin' : '#/student'} className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-base tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+                  SmartExam
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wide hidden sm:inline-block">
+                  Security Gateway
                 </span>
               </div>
-            </a>
-          </div>
+              <p className="text-[11px] text-slate-500 hidden sm:block">
+                Autonomous College Examination Platform
+              </p>
+            </div>
+          </a>
 
-          {/* Search Bar - Pill shape with Q Search placeholder */}
-          <div className="hidden md:flex items-center flex-1 max-w-xs relative">
+          {/* Quick Search Bar */}
+          <div className="hidden md:flex items-center flex-1 max-w-sm relative ml-4">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Q Search..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white text-xs text-slate-800 rounded-full border border-transparent focus:border-orange-400 focus:outline-none transition-all placeholder-slate-400 font-medium"
+              placeholder="Search candidate register no, exam code, forensic events..."
+              className="w-full pl-9 pr-4 py-1.5 bg-slate-50 hover:bg-slate-100 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-all placeholder-slate-400 font-medium"
             />
           </div>
         </div>
 
-        {/* Right Section: Notifications, Messages, Profile, Theme Toggle */}
+        {/* Right: Live Clock, 1,000 Capacity Status, User Avatar, Exit */}
         <div className="flex items-center gap-3 sm:gap-5">
-          {/* Notification Bell */}
-          <button className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white"></span>
-          </button>
-
-          {/* Messages Mail */}
-          <button className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors hidden sm:block">
-            <Mail className="w-4 h-4" />
-          </button>
-
-          {/* User Profile Capsule */}
-          <div className="flex items-center gap-3 pl-2 sm:border-l sm:border-slate-200">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 p-0.5 shadow-sm">
-              <div className="w-full h-full rounded-full bg-white flex items-center justify-center font-bold text-xs text-orange-600 uppercase">
-                {user?.name ? user.name.slice(0, 2) : 'AR'}
-              </div>
-            </div>
-
-            <div className="hidden sm:block text-left">
-              <div className="text-xs font-bold text-slate-800 leading-tight">
-                {user?.name || 'Austin Robertson'}
-              </div>
-              <div className="text-[11px] text-slate-400 leading-none mt-0.5">
-                {isAdmin ? 'Marketing Administrator' : (user?.register_number || 'Candidate')}
-              </div>
-            </div>
+          {/* Synchronized College Clock */}
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-mono font-medium border border-slate-200">
+            <Clock className="w-3.5 h-3.5 text-blue-600" />
+            <span>{currentTime}</span>
           </div>
 
-          {/* Light/Dark Toggle Switch */}
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-10 h-5.5 rounded-full bg-slate-200 p-0.5 flex items-center cursor-pointer transition-colors relative"
-            title="Toggle theme"
-          >
-            <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transform transition-transform ${isDarkMode ? 'translate-x-4.5 bg-orange-500' : 'translate-x-0'}`}></div>
-          </button>
+          {/* Concurrency Pill */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="font-semibold">1,000 Seats Ready</span>
+          </div>
 
-          {/* Institutional / Country Emblem */}
-          <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-200 flex items-center justify-center bg-slate-100 text-[10px] font-bold text-slate-600" title="Region / College">
-            🇬🇧
+          <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+          {/* User Profile */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-xs">
+              {isAdmin ? 'COE' : (user?.name ? user.name.charAt(0).toUpperCase() : 'S')}
+            </div>
+            <div className="hidden sm:block text-left">
+              <p className="text-xs font-bold text-slate-800 leading-tight">
+                {user?.name || 'Chief Invigilator'}
+              </p>
+              <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                {isAdmin ? 'Controller of Examinations' : user?.register_number}
+              </p>
+            </div>
           </div>
 
           {/* Exit / Logout */}
           <button
             onClick={logout}
             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-            title="Logout"
+            title="Terminate Session / Exit"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
       </header>
 
-      {/* Main Container with Sidebar + Content */}
+      {/* Main Framework: Sidebar + Body */}
       <div className="flex flex-1 relative">
-        {/* Left Vertical Sidebar */}
+        {/* Left Vertical Examination Menu */}
         <aside
-          className={`fixed lg:sticky top-18 z-30 h-[calc(100vh-4.5rem)] w-60 bg-white border-r border-slate-200/80 flex flex-col justify-between py-6 px-4 overflow-y-auto transition-transform lg:translate-x-0 ${
+          className={`fixed lg:sticky top-16 z-30 h-[calc(100vh-4rem)] w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between py-5 px-3 overflow-y-auto transition-transform lg:translate-x-0 ${
             mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
           }`}
         >
           <div className="space-y-6">
-            {/* Group 1: PAGES */}
+            {/* Section 1: EXAMINATION OPERATIONS */}
             <div>
-              <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2">
-                PAGES
+              <div className="text-[10px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2 font-mono">
+                {isAdmin ? 'EXAMINATION OPERATIONS' : 'CANDIDATE PORTAL'}
               </div>
               <nav className="space-y-1">
                 {currentNav.map((item) => {
@@ -184,34 +175,22 @@ export default function DashboardLayout({ children, currentPath = '', pageTitle 
                       key={item.path}
                       href={`#${item.path}`}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                         active
-                          ? 'bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white shadow-md shadow-orange-500/25'
-                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} />
                         <span>{item.name}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        {item.badge && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-md font-bold ${
-                              active
-                                ? 'bg-white/20 text-white'
-                                : 'bg-slate-100 text-slate-500'
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
+                        {item.live && (
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         )}
-                        <ChevronRight
-                          className={`w-3.5 h-3.5 ${
-                            active ? 'text-white' : 'text-slate-300'
-                          }`}
-                        />
+                        <ChevronRight className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-slate-300'}`} />
                       </div>
                     </a>
                   );
@@ -219,91 +198,64 @@ export default function DashboardLayout({ children, currentPath = '', pageTitle 
               </nav>
             </div>
 
-            {/* Group 2: UI ELEMENTS / CONTROLS */}
+            {/* Section 2: PROCTORING SECURITY ENFORCEMENT */}
             <div>
-              <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2">
-                UI ELEMENTS
+              <div className="text-[10px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2 font-mono">
+                SECURITY ENFORCEMENT
               </div>
-              <div className="space-y-1 text-slate-500 text-xs font-medium">
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Layers className="w-4 h-4 text-slate-400" />
-                    <span>Menu Styles</span>
-                  </div>
+              <div className="space-y-2 px-2 text-xs">
+                <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 text-[11px] font-medium">Fullscreen Enforcer</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
+                    ACTIVE
+                  </span>
                 </div>
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-4 h-4 text-slate-400" />
-                    <span>Tables</span>
-                  </div>
+                <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 text-[11px] font-medium">Single-Device Lock</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
+                    LOCKED
+                  </span>
                 </div>
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <BarChart2 className="w-4 h-4 text-slate-400" />
-                    <span>Charts</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Sliders className="w-4 h-4 text-slate-400" />
-                    <span>Forms</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Cpu className="w-4 h-4 text-slate-400" />
-                    <span>Pricing</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="w-4 h-4 text-slate-400" />
-                    <span>Modals/Pop-Ups</span>
-                  </div>
+                <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 text-[11px] font-medium">Dynamic Watermark</span>
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                    INJECTED
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Group 3: DOCUMENTATION & SUPPORT */}
+            {/* Section 3: ARCHITECTURE SPECS */}
             <div>
-              <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2">
-                DOCUMENTATION & SUPPORT
+              <div className="text-[10px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2 font-mono">
+                ENGINE STATUS
               </div>
-              <div className="space-y-1 text-slate-500 text-xs font-medium">
-                <a
-                  href="#/admin"
-                  className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-4 h-4 text-slate-400" />
-                    <span>Documentation</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-                </a>
-                <a
-                  href="#/admin"
-                  className="flex items-center justify-between px-3.5 py-2 rounded-xl hover:bg-slate-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <HelpCircle className="w-4 h-4 text-slate-400" />
-                    <span>Support</span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-                </a>
+              <div className="space-y-1.5 px-3 text-[11px] text-slate-500 font-mono">
+                <div className="flex justify-between">
+                  <span>Engine:</span>
+                  <strong className="text-slate-700">WASM SQLite</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Capacity:</span>
+                  <strong className="text-emerald-600">1,000 Students</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Hosting Cost:</span>
+                  <strong className="text-blue-600">$0.00 / Free</strong>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar Footer / Free Concurrency Capsule */}
-          <div className="pt-4 border-t border-slate-100">
-            <div className="bg-orange-50/70 border border-orange-100 rounded-2xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                <span className="text-[11px] font-bold text-orange-800">1000 Capacity Ready</span>
-              </div>
-              <p className="text-[10px] text-slate-500 leading-tight">
-                Zero-cost in-memory SQLite + Brotli optimization active.
-              </p>
+          {/* Institutional Badge Footer */}
+          <div className="pt-4 border-t border-slate-100 px-2">
+            <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3 text-center">
+              <span className="text-[11px] font-bold text-blue-800 block">
+                Anna University Regulation
+              </span>
+              <span className="text-[10px] text-slate-500 mt-0.5 block">
+                Smart Exam Security Platform v2.0
+              </span>
             </div>
           </div>
         </aside>
@@ -312,11 +264,11 @@ export default function DashboardLayout({ children, currentPath = '', pageTitle 
         {mobileMenuOpen && (
           <div
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-20 lg:hidden"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-20 lg:hidden"
           ></div>
         )}
 
-        {/* Main Content Area */}
+        {/* Main Content Viewport */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-x-hidden">
           {children}
         </main>

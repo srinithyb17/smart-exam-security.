@@ -70,7 +70,7 @@ export default function SecurityLogs() {
 
           <button
             onClick={fetchLogs}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Sync</span>
@@ -78,11 +78,11 @@ export default function SecurityLogs() {
         </div>
 
         {/* Filters */}
-        <div className="extej-card p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="exam-card p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <select
             value={selectedExamId}
             onChange={(e) => { setSelectedExamId(e.target.value); setPage(1); }}
-            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="">All Examinations</option>
             {exams.map((ex) => (
@@ -93,7 +93,7 @@ export default function SecurityLogs() {
           <select
             value={selectedEventType}
             onChange={(e) => { setSelectedEventType(e.target.value); setPage(1); }}
-            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="">All Violation Types</option>
             <option value="FULLSCREEN_EXIT">Fullscreen Exit</option>
@@ -106,7 +106,7 @@ export default function SecurityLogs() {
           <select
             value={selectedSeverity}
             onChange={(e) => { setSelectedSeverity(e.target.value); setPage(1); }}
-            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+            className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="">All Severities</option>
             <option value="CRITICAL">🔴 Critical</option>
@@ -117,11 +117,11 @@ export default function SecurityLogs() {
         </div>
 
         {/* Audit Table */}
-        <div className="extej-card overflow-hidden">
+        <div className="exam-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                   <th className="py-3 px-4">Timestamp</th>
                   <th className="py-3 px-4">Candidate</th>
                   <th className="py-3 px-4">Violation Event</th>
@@ -161,7 +161,7 @@ export default function SecurityLogs() {
                             CRITICAL
                           </span>
                         ) : log.severity === 'HIGH' ? (
-                          <span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
                             HIGH
                           </span>
                         ) : (

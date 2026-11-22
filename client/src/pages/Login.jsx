@@ -62,27 +62,28 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col justify-between antialiased">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between antialiased">
       {/* Top Header */}
-      <header className="bg-white border-b border-slate-200/80 px-6 sm:px-12 py-4 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200/80 px-6 sm:px-12 py-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#ff4d2e] via-[#ff6a1a] to-[#ff8f3d] flex items-center justify-center shadow-md shadow-orange-500/25">
-            <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            </svg>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <ShieldCheck className="w-5 h-5 text-white" />
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-slate-900 tracking-tight">Extej</span>
-            <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200">
-              Exam Security
-            </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-black text-slate-900 tracking-tight">SmartExam</span>
+              <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                Security v2.0
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500">Autonomous College Examination Portal</p>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-4 text-xs font-medium text-slate-500">
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Capacity: <strong className="text-slate-800">1000 Concurrent Free</strong>
+            Capacity: <strong className="text-slate-800">1,000 Concurrent Free</strong>
           </span>
           <span>•</span>
           <span>WASM In-Memory SQLite</span>
@@ -93,29 +94,29 @@ export default function Login() {
       <main className="flex-1 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
           {/* Card */}
-          <div className="extej-card p-8 sm:p-10 shadow-xl border border-slate-200/80">
+          <div className="exam-card p-8 sm:p-10 shadow-lg border border-slate-200/90">
             {/* Header / Seal */}
             <div className="text-center mb-6">
-              <div className="inline-flex p-3 rounded-2xl bg-orange-50 text-orange-600 mb-3 border border-orange-100 shadow-sm">
-                <ShieldCheck className="w-8 h-8 text-[#ff7a1a]" />
+              <div className="inline-flex p-3 rounded-2xl bg-blue-50 text-blue-600 mb-3 border border-blue-100 shadow-xs">
+                <ShieldCheck className="w-8 h-8 text-blue-600" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                Autonomous College Assessment Portal
+              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                Secure Assessment Gateway
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Enter your credentials to enter the proctored environment
+                Enter your authorized credentials to access proctored examination papers
               </p>
             </div>
 
             {/* Role Switcher Tabs */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl mb-6">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl mb-6">
               <button
                 type="button"
                 onClick={() => { setRole('student'); setError(''); }}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   role === 'student'
-                    ? 'bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white shadow-md shadow-orange-500/25'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <GraduationCap className="w-4 h-4" />
@@ -125,14 +126,14 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setRole('admin'); setError(''); }}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   role === 'admin'
-                    ? 'bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white shadow-md shadow-orange-500/25'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Shield className="w-4 h-4" />
-                <span>Invigilator</span>
+                <span>Invigilator / COE</span>
               </button>
             </div>
 
@@ -148,8 +149,8 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {role === 'student' ? (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Register Number
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Candidate Register Number
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
@@ -159,14 +160,14 @@ export default function Login() {
                       value={registerNumber}
                       onChange={(e) => setRegisterNumber(e.target.value)}
                       placeholder="e.g. 910021104001"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition-all font-medium"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 transition-all font-medium"
                     />
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Admin Username
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Invigilator / Administrator Username
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
@@ -176,14 +177,14 @@ export default function Login() {
                       value={adminUsername}
                       onChange={(e) => setAdminUsername(e.target.value)}
                       placeholder="e.g. admin"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition-all font-medium"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 transition-all font-medium"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
@@ -194,7 +195,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition-all font-medium"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 transition-all font-medium"
                   />
                   <button
                     type="button"
@@ -210,13 +211,13 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>Authenticate & Access</span>
+                    <span>Authenticate & Access Examination</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -225,23 +226,23 @@ export default function Login() {
 
             {/* Quick Demo Credentials */}
             <div className="mt-6 pt-5 border-t border-slate-100">
-              <span className="text-[11px] font-semibold text-slate-400 block mb-2 text-center uppercase tracking-wider">
-                Instant Demo Access
+              <span className="text-[10px] font-bold text-slate-400 block mb-2 text-center uppercase tracking-wider font-mono">
+                One-Click Quick Evaluation Access
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setDemoCredentials('student')}
-                  className="py-1.5 px-2 bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-700 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all cursor-pointer text-center"
+                  className="py-1.5 px-2 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all cursor-pointer text-center"
                 >
-                  Student (910021104001)
+                  Candidate (910021104001)
                 </button>
                 <button
                   type="button"
                   onClick={() => setDemoCredentials('admin')}
-                  className="py-1.5 px-2 bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-700 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all cursor-pointer text-center"
+                  className="py-1.5 px-2 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 rounded-xl text-[11px] font-semibold transition-all cursor-pointer text-center"
                 >
-                  Admin (admin)
+                  Admin / COE (admin)
                 </button>
               </div>
             </div>
@@ -250,8 +251,8 @@ export default function Login() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-[11px] text-slate-400 border-t border-slate-200/80 bg-white">
-        Smart Examination Security Platform • Free Concurrency 1000 Architecture • Anna University Standard
+      <footer className="text-center py-4 text-[11px] text-slate-500 border-t border-slate-200/80 bg-white">
+        Smart Examination Security Platform • High-Concurrency 1,000 Architecture • Anna University Affiliated College Standard
       </footer>
     </div>
   );

@@ -20,8 +20,9 @@ import {
   Sparkles,
   ArrowUpRight,
   ShieldCheck,
-  Check,
-  MoreVertical
+  FileCheck,
+  Layers,
+  Lock
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -36,7 +37,7 @@ export default function AdminDashboard() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeFilter, setTimeFilter] = useState('1D');
+  const [timeFilter, setTimeFilter] = useState('Today');
 
   const loadDashboardData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -88,450 +89,368 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <DashboardLayout currentPath="/admin" pageTitle="Wallet">
+    <DashboardLayout currentPath="/admin" pageTitle="Executive Examination Overview">
       <div className="space-y-6">
-        {/* Page Title - Matching "Wallet" from image */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Wallet
-          </h1>
-          <button
-            onClick={() => loadDashboardData(true)}
-            disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition-all cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-orange-500' : ''}`} />
-            <span>Sync Live</span>
-          </button>
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Executive Examination Overview
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Controller of Examinations proctoring cockpit • High-concurrency telemetry & forensic auditing
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => loadDashboardData(true)}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
+              <span>Sync Telemetry</span>
+            </button>
+
+            <a
+              href="#/admin/exams"
+              className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-4 py-2 rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ New Exam</span>
+            </a>
+          </div>
         </div>
 
-        {/* Row 1: Top Metrics Cards (Balance, Bitcoin, Ethereum + ADD) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* Card 1: Balance Card (Matching Extej Balance card) */}
-          <div className="lg:col-span-5 extej-card p-5 sm:p-6 flex flex-col justify-between relative">
+        {/* Top Row: 4 Real Examination KPI Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {/* Card 1: Active Concurrency */}
+          <div className="exam-card p-5 flex flex-col justify-between">
             <div>
-              {/* Header with Icon + "Balance" and Currency Dropdown */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md border border-slate-300 flex items-center justify-center text-slate-400">
-                    <span className="text-[10px]">💳</span>
-                  </div>
-                  <span className="text-sm font-semibold text-slate-600">Balance</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
-                  <span>USD</span>
-                  <span className="text-[10px]">▼</span>
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Live Concurrency
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               </div>
-
-              {/* Big Bold Balance Number */}
-              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight my-2">
-                $1,180,577.24
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {stats.activeSessions}
+                </span>
+                <span className="text-xs font-semibold text-slate-400">/ 1,000 Capacity</span>
               </div>
-
-              {/* Multi-segment Colored Bar (BTC orange, ETH blue, USDT green, Other gray) */}
-              <div className="h-1.5 w-full rounded-full flex overflow-hidden my-3">
-                <div className="bg-[#ff7a1a] w-[45%]" title="BTC (45%)"></div>
-                <div className="bg-[#4f86f7] w-[25%]" title="ETH (25%)"></div>
-                <div className="bg-[#00c087] w-[20%]" title="USDT (20%)"></div>
-                <div className="bg-[#e2e8f0] w-[10%]" title="Other (10%)"></div>
-              </div>
-
-              {/* Legend Dots Underneath */}
-              <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium py-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#ff7a1a]"></span>
-                  <span>BTC</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#4f86f7]"></span>
-                  <span>ETH</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#00c087]"></span>
-                  <span>USDT</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-slate-300"></span>
-                  <span>Other</span>
-                </div>
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden my-3">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.max(5, (stats.activeSessions / 1000) * 100)}%` }}
+                ></div>
               </div>
             </div>
-
-            {/* Profit Today & Trend Indicator */}
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-3">
-              <div>
-                <span className="text-[11px] text-slate-400 block font-medium">Profit today</span>
-                <span className="text-sm font-bold text-[#00c087]">+$4,245.45</span>
-              </div>
-              <span className="text-xs font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                +14.5%
-              </span>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              <span>WASM In-Memory Engine</span>
+              <span className="text-emerald-600 font-bold">100% Free</span>
             </div>
           </div>
 
-          {/* Card 2: Bitcoin Card (with Swap, Buy, Send buttons) */}
-          <div className="lg:col-span-4 extej-card p-5 sm:p-6 flex flex-col justify-between">
+          {/* Card 2: Security & Integrity Index */}
+          <div className="exam-card p-5 flex flex-col justify-between">
             <div>
-              {/* Header with Bitcoin Icon & Dropdown */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#ff7a1a] flex items-center justify-center text-white font-bold text-[10px]">
-                    ₿
-                  </div>
-                  <span className="text-sm font-semibold text-slate-700">Bitcoin</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
-                  <span>USD</span>
-                  <span className="text-[10px]">▼</span>
-                </div>
-              </div>
-
-              {/* Big Bold BTC Value & Subtitle */}
-              <div className="flex items-baseline justify-between mt-2">
-                <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    108,61 BTC
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-medium mt-0.5">
-                    $213,017.17
-                  </div>
-                </div>
-                <div className="text-[11px] text-slate-400 font-medium">
-                  1 BTC = $19,509.23
-                </div>
-              </div>
-
-              {/* Profit Today */}
-              <div className="flex items-center justify-between my-3 text-xs">
-                <div>
-                  <span className="text-slate-400 text-[11px] block">Profit today</span>
-                  <span className="font-bold text-[#00c087]">+$1,237.45</span>
-                </div>
-                <span className="text-[11px] font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  +5%
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Session Integrity
+                </span>
+                <span className="p-1 rounded-md bg-blue-50 text-blue-600">
+                  <ShieldCheck className="w-4 h-4" />
                 </span>
               </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-blue-600 tracking-tight">
+                  99.8%
+                </span>
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
+                  Optimal
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 my-3">
+                Strict Fullscreen & Single Device Lock enforced.
+              </p>
             </div>
-
-            {/* 3 Action Buttons: Swap, Buy (orange), Send (coral/rose) */}
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              <button
-                onClick={() => window.location.hash = '#/admin/exams'}
-                className="py-2 px-3 rounded-xl bg-orange-100/70 hover:bg-orange-200/70 text-orange-700 text-xs font-semibold text-center transition-colors cursor-pointer"
-              >
-                Swap
-              </button>
-              <button
-                onClick={() => window.location.hash = '#/admin/monitor'}
-                className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-semibold text-center shadow-md shadow-orange-500/20 transition-all cursor-pointer"
-              >
-                Buy
-              </button>
-              <button
-                onClick={() => window.location.hash = '#/admin/reports'}
-                className="py-2 px-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold text-center shadow-md shadow-rose-500/20 transition-all cursor-pointer"
-              >
-                Send
-              </button>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              <span>DevTools Guard:</span>
+              <span className="text-slate-800 font-bold">Blocked</span>
             </div>
           </div>
 
-          {/* Card 3: Ethereum Card / Security Status */}
-          <div className="lg:col-span-3 extej-card p-5 sm:p-6 flex flex-col justify-between">
+          {/* Card 3: Question Papers & Schedules */}
+          <div className="exam-card p-5 flex flex-col justify-between">
             <div>
-              {/* Header with Ethereum Icon */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#4f86f7] flex items-center justify-center text-white font-bold text-[10px]">
-                    Ξ
-                  </div>
-                  <span className="text-sm font-semibold text-slate-700">Ethereum</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">
-                  <span>USD</span>
-                  <span className="text-[10px]">▼</span>
-                </div>
-              </div>
-
-              {/* Big Bold ETH Value */}
-              <div className="mt-2">
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  107,45 ETH
-                </div>
-                <div className="text-[11px] text-slate-400 font-medium mt-0.5">
-                  $31,569.20
-                </div>
-              </div>
-
-              {/* Profit Today */}
-              <div className="flex items-center justify-between my-3 text-xs">
-                <div>
-                  <span className="text-slate-400 text-[11px] block">Profit today</span>
-                  <span className="font-bold text-[#00c087]">+$3,237.10</span>
-                </div>
-                <span className="text-[11px] font-bold text-[#00c087] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  +5%
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Examination Papers
+                </span>
+                <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
+                  <FileText className="w-4 h-4" />
                 </span>
               </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {stats.totalExams}
+                </span>
+                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                  {stats.activeExams} Active Now
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 my-3">
+                AES Encrypted & Dynamic Canvas Watermark.
+              </p>
             </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              <span>Active Subject:</span>
+              <span className="text-slate-800 font-bold font-mono">CS8591</span>
+            </div>
+          </div>
 
-            {/* Action button */}
-            <div className="pt-2">
-              <button
-                onClick={() => window.location.hash = '#/admin/exams'}
-                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-semibold text-center shadow-md shadow-orange-500/20 transition-all cursor-pointer"
-              >
-                Manage
-              </button>
+          {/* Card 4: Candidates & Appeals */}
+          <div className="exam-card p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Candidate Roster
+                </span>
+                <span className="p-1 rounded-md bg-amber-50 text-amber-600">
+                  <Users className="w-4 h-4" />
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {stats.totalStudents}
+                </span>
+                <span className="text-xs font-semibold text-slate-400">Enrolled</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 my-3">
+                {stats.pendingResets > 0 ? (
+                  <span className="text-amber-600 font-bold flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    {stats.pendingResets} unlock appeals pending
+                  </span>
+                ) : (
+                  <span className="text-slate-500">Zero pending lockout appeals</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              <span>Appeals Desk:</span>
+              <a href="#/admin/resets" className="text-blue-600 font-bold hover:underline">
+                Review Queue →
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Row 2: "My Wallets" Graph Section (with 1D, 7D, 1M, 3M, 6M, 1Y, ALL) */}
-        <div className="extej-card p-5 sm:p-6">
+        {/* Middle Section: Real-Time Candidate Concurrency Telemetry Chart */}
+        <div className="exam-card p-5 sm:p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <h2 className="text-lg font-bold text-slate-900">
-              My Wallets
-            </h2>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Examination Concurrency & System Throughput
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Real-time synchronized candidate connections, active PDF rendering heartbeats, and submission curve
+              </p>
+            </div>
 
             {/* Time Filter Pills */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {['1D', '7D', '1M', '3M', '6M', '1Y', 'ALL'].map((f) => (
+            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+              {['Today', '3 Hours', 'Peak Load', 'Historical'].map((filter) => (
                 <button
-                  key={f}
-                  onClick={() => setTimeFilter(f)}
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
-                    timeFilter === f
-                      ? 'bg-[#ff7a1a] text-white shadow-sm shadow-orange-500/30'
-                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                  key={filter}
+                  onClick={() => setTimeFilter(filter)}
+                  className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    timeFilter === filter
+                      ? 'bg-white text-blue-600 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {f}
+                  {filter}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* SVG Smooth Area Chart with Orange Wave & Floating Tooltip */}
-          <div className="relative w-full h-56 pt-4">
-            {/* Floating Tooltip Pill (Matching "My Balance $1,176,356.46 +3.21%") */}
-            <div className="absolute right-[22%] top-2 bg-white rounded-xl shadow-lg border border-slate-100 px-3 py-1.5 z-10 flex flex-col items-center">
-              <span className="text-[10px] text-slate-400 font-medium">My Balance</span>
-              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800">
-                <span>$1,176,356.46</span>
-                <span className="text-[#00c087] text-[10px] font-bold">+3.21%</span>
+          {/* SVG Concurrency Curve */}
+          <div className="relative w-full h-56 pt-2">
+            {/* Floating Tooltip Indicator */}
+            <div className="absolute right-[25%] top-2 bg-white rounded-xl shadow-md border border-slate-200 px-3 py-1.5 z-10 flex flex-col items-center">
+              <span className="text-[10px] text-slate-400 font-medium font-mono">CONCURRENT LOAD</span>
+              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900">
+                <span>942 Candidates Online</span>
+                <span className="text-emerald-600 text-[10px] font-bold">0ms Latency</span>
               </div>
-              {/* Pointer indicator line down */}
-              <div className="w-0.5 h-6 bg-blue-400/80 -mb-6 mt-1"></div>
+              <div className="w-0.5 h-6 bg-blue-500 -mb-6 mt-1"></div>
             </div>
 
-            {/* SVG Bezier Area Chart */}
+            {/* SVG Area Chart */}
             <svg viewBox="0 0 800 200" className="w-full h-40 overflow-visible" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="extejOrangeGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff7a1a" stopOpacity="0.28" />
-                  <stop offset="100%" stopColor="#ff7a1a" stopOpacity="0.01" />
+                <linearGradient id="concurrencyGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
                 </linearGradient>
               </defs>
 
-              {/* Horizontal grid lines */}
-              <line x1="0" y1="50" x2="800" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="0" y1="100" x2="800" y2="100" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="0" y1="150" x2="800" y2="150" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="40" x2="800" y2="40" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="0" y1="140" x2="800" y2="140" stroke="#f1f5f9" strokeWidth="1" />
 
-              {/* Area Fill */}
+              {/* Area path */}
               <path
-                d="M0,130 Q100,135 150,110 T250,130 T350,115 T450,120 T550,105 T620,95 L620,200 L0,200 Z"
-                fill="url(#extejOrangeGrad)"
+                d="M0,150 Q120,140 200,90 T380,50 T560,45 T600,48 L600,200 L0,200 Z"
+                fill="url(#concurrencyGradient)"
               />
               <path
-                d="M620,95 Q680,65 740,70 T800,90 L800,200 L620,200 Z"
-                fill="url(#extejOrangeGrad)"
+                d="M600,48 Q680,60 740,110 T800,160 L800,200 L600,200 Z"
+                fill="url(#concurrencyGradient)"
               />
 
-              {/* Orange Wave Curve Line */}
+              {/* Smooth curve line */}
               <path
-                d="M0,130 Q100,135 150,110 T250,130 T350,115 T450,120 T550,105 T620,95"
+                d="M0,150 Q120,140 200,90 T380,50 T560,45 T600,48"
                 fill="none"
-                stroke="#ff7a1a"
+                stroke="#2563eb"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
               <path
-                d="M620,95 Q680,65 740,70 T800,90"
+                d="M600,48 Q680,60 740,110 T800,160"
                 fill="none"
-                stroke="#ff7a1a"
+                stroke="#2563eb"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
 
-              {/* Tooltip dot */}
-              <circle cx="620" cy="95" r="4.5" fill="#ffffff" stroke="#4f86f7" strokeWidth="2.5" />
+              {/* Peak indicator dot */}
+              <circle cx="600" cy="48" r="4.5" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
             </svg>
 
-            {/* X-Axis Timestamps (04:00, 09:00, 14:00, 19:00, 00:00) */}
+            {/* X-Axis Timestamps */}
             <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-3 px-2">
-              <span>04:00</span>
-              <span>09:00</span>
-              <span>14:00</span>
-              <span>19:00</span>
-              <span>00:00</span>
+              <span>09:00 AM (Paper Released)</span>
+              <span>10:00 AM (Reading & Writing)</span>
+              <span>11:00 AM (Mid-Session Peak)</span>
+              <span>12:00 PM (Submission Window)</span>
             </div>
           </div>
         </div>
 
-        {/* Row 3: "My Card" Section (with + ADD button and 3 Credit Cards) */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900">
-              My Card
-            </h2>
-            <button
-              onClick={() => window.location.hash = '#/admin/students'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-semibold shadow-sm shadow-orange-500/25 hover:from-[#f06a0a] hover:to-[#ff831a] transition-all cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>+ ADD</span>
-            </button>
-          </div>
-
-          {/* 3 Physical Credit / Admit Cards Side-by-Side */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Card 1: Jordan Belford / Active Checkmark Card */}
-            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 relative group hover:shadow-md transition-shadow">
-              {/* Top Row: Mastercard circles & Orange Checkmark */}
-              <div className="flex items-center justify-between">
-                {/* Mastercard Overlapping Circles Logo */}
-                <div className="flex items-center -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
-                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
-                </div>
-                {/* Orange Circle Checkmark Pill */}
-                <div className="w-5 h-5 rounded-full bg-[#ff7a1a] flex items-center justify-center text-white text-[11px] shadow-sm shadow-orange-500/30">
-                  <Check className="w-3 h-3 stroke-[3]" />
-                </div>
+        {/* Bottom Section: Active Question Papers & Real-Time Alerts Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Column 1: Active Examination Papers */}
+          <div className="lg:col-span-7 exam-card p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 className="font-bold text-slate-900 text-sm">
+                  Active Examination Papers ({exams.length})
+                </h3>
               </div>
-
-              {/* Card Number formatted in 4-digit groups */}
-              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
-                1111 2222 3333 4444
-              </div>
-
-              {/* Bottom Row: Card Holder, Expiry, Badge */}
-              <div className="flex items-end justify-between text-[10px]">
-                <div>
-                  <span className="text-slate-400 block font-medium">Card holder</span>
-                  <span className="font-bold text-slate-800 uppercase tracking-wide">JORDAN BELFORD</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block font-medium">Expiry</span>
-                  <span className="font-bold text-slate-800">01/23</span>
-                </div>
-                <div>
-                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
-                    PERSONAL
-                  </span>
-                </div>
-              </div>
+              <a
+                href="#/admin/exams"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                <span>Manage Papers</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
             </div>
 
-            {/* Card 2: Mike Profits Card */}
-            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
-                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
+            <div className="space-y-3">
+              {exams.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  No active examination papers scheduled.
                 </div>
-              </div>
+              ) : (
+                exams.map((exam) => (
+                  <div
+                    key={exam.id}
+                    className="p-4 rounded-xl border border-slate-200/80 hover:border-blue-300 transition-all bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 font-mono text-[11px] font-bold">
+                          {exam.exam_code}
+                        </span>
+                        <span className="text-xs text-slate-400 font-medium">
+                          {exam.department}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-slate-800 text-sm">
+                        {exam.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Duration: {exam.duration_minutes} Mins • Strike Tolerance: {exam.max_violations} strikes
+                      </p>
+                    </div>
 
-              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
-                4444 3333 2222 1111
-              </div>
-
-              <div className="flex items-end justify-between text-[10px]">
-                <div>
-                  <span className="text-slate-400 block font-medium">Card holder</span>
-                  <span className="font-bold text-slate-800 uppercase tracking-wide">MIKE PROFITS</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block font-medium">Expiry</span>
-                  <span className="font-bold text-slate-800">01/23</span>
-                </div>
-                <div>
-                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
-                    PERSONAL
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Jason Brax Card */}
-            <div className="smart-admit-card p-5 flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-[#eb001b] opacity-90"></div>
-                  <div className="w-6 h-6 rounded-full bg-[#f79e1b] opacity-90"></div>
-                </div>
-              </div>
-
-              <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-slate-800 my-2">
-                1111 2222 3333 4444
-              </div>
-
-              <div className="flex items-end justify-between text-[10px]">
-                <div>
-                  <span className="text-slate-400 block font-medium">Card holder</span>
-                  <span className="font-bold text-slate-800 uppercase tracking-wide">JASON BRAX</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block font-medium">Expiry</span>
-                  <span className="font-bold text-slate-800">01/23</span>
-                </div>
-                <div>
-                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[9px] border border-slate-200">
-                    PERSONAL
-                  </span>
-                </div>
-              </div>
+                    <a
+                      href={`#/admin/monitor?examId=${exam.id}`}
+                      className="py-1.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Live Cockpit</span>
+                    </a>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Live Examination Quick Links / System State */}
-        <div className="extej-card p-5 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h3 className="font-bold text-slate-900 text-sm">
-                Active Assessment Gateway • 1000 Concurrency Status
-              </h3>
+          {/* Column 2: Live Forensic Security Feed */}
+          <div className="lg:col-span-5 exam-card p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-orange-500" />
+                <h3 className="font-bold text-slate-900 text-sm">
+                  Live Forensic Security Feed
+                </h3>
+              </div>
+              <a
+                href="#/admin/security"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Full Audit Trail →
+              </a>
             </div>
-            <a
-              href="#/admin/monitor"
-              className="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
-            >
-              <span>Open Cockpit</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-[11px] text-slate-400 block">Total Candidates</span>
-              <span className="text-lg font-black text-slate-800">{stats.totalStudents}</span>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-[11px] text-slate-400 block">Active Papers</span>
-              <span className="text-lg font-black text-slate-800">{stats.totalExams}</span>
-            </div>
-            <div className="bg-orange-50/60 p-3 rounded-2xl border border-orange-100">
-              <span className="text-[11px] text-orange-600 block">Live Candidates</span>
-              <span className="text-lg font-black text-orange-700">{stats.activeSessions}</span>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <span className="text-[11px] text-slate-400 block">Pending Appeals</span>
-              <span className="text-lg font-black text-slate-800">{stats.pendingResets}</span>
+            <div className="space-y-2.5">
+              {stats.recentAlerts.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                  <span>No security violations detected. All candidates operating in clean fullscreen mode.</span>
+                </div>
+              ) : (
+                stats.recentAlerts.slice(0, 5).map((alert, i) => (
+                  <div
+                    key={i}
+                    className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-start justify-between gap-2 text-xs"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-slate-800">
+                          {alert.register_number}
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-rose-50 text-rose-600 border border-rose-100">
+                          {alert.event_type}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                        {alert.details}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                      {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -45,7 +45,7 @@ export default function FullscreenGuard({ isExamActive, onFullscreenExit, childr
   if (isExamActive && !isFullscreen) {
     return (
       <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
-        <div className="max-w-lg w-full extej-card p-8 text-center shadow-2xl relative z-10 bg-white">
+        <div className="max-w-lg w-full exam-card p-8 text-center shadow-2xl relative z-10 bg-white">
           {/* Animated Shield Icon */}
           <div className="mx-auto w-16 h-16 mb-4 rounded-2xl bg-gradient-to-tr from-[#ff4d2e] to-[#ff8f3d] flex items-center justify-center shadow-lg shadow-orange-500/25">
             <Maximize2 className="w-8 h-8 text-white" />

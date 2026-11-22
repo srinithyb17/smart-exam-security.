@@ -43,14 +43,14 @@ export default function ExamCompleted() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col items-center justify-center p-4 relative antialiased print:bg-white print:p-0">
-      <div className="max-w-lg w-full extej-card p-8 sm:p-10 text-center shadow-xl relative z-10 print:shadow-none print:border-none">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-4 relative antialiased print:bg-white print:p-0">
+      <div className="max-w-lg w-full exam-card p-8 sm:p-10 text-center shadow-xl relative z-10 print:shadow-none print:border-none">
         {/* Verified Academic Seal */}
-        <div className="mx-auto w-20 h-20 mb-5 rounded-2xl bg-gradient-to-tr from-[#00c087] to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+        <div className="mx-auto w-20 h-20 mb-5 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/25">
           <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
 
-        <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3 inline-block">
+        <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3 inline-block font-mono">
           Official Digital Receipt
         </span>
 
@@ -58,7 +58,7 @@ export default function ExamCompleted() {
           Examination Submitted!
         </h1>
         <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-          Your answers have been cryptographically sealed and permanently logged into the evaluation database.
+          Your answers have been cryptographically sealed and permanently logged into the university evaluation database.
         </p>
 
         {/* Receipt Details Card */}
@@ -80,7 +80,7 @@ export default function ExamCompleted() {
 
           <div className="pt-1">
             <span className="text-slate-400 block text-[10px] mb-1">Receipt Hash:</span>
-            <div className="bg-white p-2 rounded-lg border border-slate-200 text-[10px] text-slate-600 break-all select-all">
+            <div className="bg-white p-2 rounded-lg border border-slate-200 text-[10px] text-slate-600 break-all select-all font-mono">
               {submissionHash}
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function ExamCompleted() {
         <div className="flex items-center gap-3 print:hidden">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Printer className="w-4 h-4" />
             <span>Print Receipt</span>
@@ -98,7 +98,7 @@ export default function ExamCompleted() {
 
           <a
             href="#/student"
-            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Home className="w-4 h-4" />
             <span>Return Home</span>

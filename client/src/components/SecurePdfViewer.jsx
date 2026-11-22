@@ -198,7 +198,7 @@ export default function SecurePdfViewer({
       {/* Floating Toolbar Dock */}
       <div className="bg-white border-b border-slate-200/80 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <Shield className="w-4 h-4 text-orange-500" />
+          <Shield className="w-4 h-4 text-blue-600" />
           <span className="font-semibold text-slate-800">Secure Canvas Protected</span>
           <span className="text-slate-300">•</span>
           <span>Download & Print Guard Active</span>
@@ -224,7 +224,7 @@ export default function SecurePdfViewer({
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 onBlur={handlePageInputSubmit}
-                className="w-8 py-0.5 text-center bg-white border border-slate-200 rounded text-orange-600 font-mono text-xs focus:outline-none focus:border-orange-500"
+                className="w-8 py-0.5 text-center bg-white border border-slate-200 rounded text-blue-600 font-mono text-xs focus:outline-none focus:border-blue-500"
               />
               <span className="text-slate-400">/ {totalPages || 1}</span>
             </form>
@@ -277,7 +277,7 @@ export default function SecurePdfViewer({
       <div className="relative flex-1 overflow-auto bg-[#f8fafc] p-4 sm:p-8 flex items-center justify-center">
         {loading && (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
-            <div className="w-10 h-10 border-3 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <p className="text-sm font-semibold text-slate-700">
               Streaming & Decrypting Question Paper...
             </p>

@@ -74,7 +74,7 @@ export default function ExamReports() {
   const currentExam = exams.find((e) => e.id.toString() === selectedExamId.toString());
 
   return (
-    <DashboardLayout currentPath="/admin/reports" pageTitle="Audit Reports">
+    <DashboardLayout currentPath="/admin/reports" pageTitle="Official Audit Reports">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
@@ -91,7 +91,7 @@ export default function ExamReports() {
             <select
               value={selectedExamId}
               onChange={(e) => setSelectedExamId(e.target.value)}
-              className="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-bold focus:outline-none focus:border-orange-500 shadow-sm cursor-pointer"
+              className="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-bold focus:outline-none focus:border-blue-500 shadow-xs cursor-pointer"
             >
               {exams.map((ex) => (
                 <option key={ex.id} value={ex.id}>
@@ -102,15 +102,15 @@ export default function ExamReports() {
 
             <button
               onClick={handleDownloadCSV}
-              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Download className="w-4 h-4 text-orange-600" />
+              <Download className="w-4 h-4 text-blue-600" />
               <span>Export CSV</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Print Audit Sheet</span>
@@ -126,7 +126,7 @@ export default function ExamReports() {
           <div className="space-y-6">
             {/* Top Metrics Row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="extej-card p-5">
+              <div className="exam-card p-5">
                 <span className="text-[11px] text-slate-400 block font-semibold">Total Enrolled</span>
                 <span className="text-2xl font-black text-slate-900 mt-1 block">
                   {participationData.total_enrolled}
@@ -134,7 +134,7 @@ export default function ExamReports() {
                 <span className="text-[10px] text-slate-400 mt-1 block">Candidates</span>
               </div>
 
-              <div className="extej-card p-5">
+              <div className="exam-card p-5">
                 <span className="text-[11px] text-slate-400 block font-semibold">Active & Attended</span>
                 <span className="text-2xl font-black text-emerald-600 mt-1 block">
                   {participationData.active_count + participationData.submitted_count}
@@ -144,7 +144,7 @@ export default function ExamReports() {
                 </span>
               </div>
 
-              <div className="extej-card p-5">
+              <div className="exam-card p-5">
                 <span className="text-[11px] text-slate-400 block font-semibold">Verified Submissions</span>
                 <span className="text-2xl font-black text-blue-600 mt-1 block">
                   {participationData.submitted_count}
@@ -152,7 +152,7 @@ export default function ExamReports() {
                 <span className="text-[10px] text-slate-400 mt-1 block">Cryptographically Signed</span>
               </div>
 
-              <div className="extej-card p-5">
+              <div className="exam-card p-5">
                 <span className="text-[11px] text-slate-400 block font-semibold">Suspended / Locked</span>
                 <span className={`text-2xl font-black mt-1 block ${participationData.locked_count > 0 ? 'text-rose-600' : 'text-slate-800'}`}>
                   {participationData.locked_count}
@@ -162,12 +162,12 @@ export default function ExamReports() {
             </div>
 
             {/* Participation Candidates Table */}
-            <div className="extej-card overflow-hidden">
+            <div className="exam-card overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="font-bold text-slate-900 text-sm">
                   Candidate Session Records ({participationData.candidates?.length || 0})
                 </h3>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   {currentExam?.exam_code}
                 </span>
               </div>
@@ -175,7 +175,7 @@ export default function ExamReports() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                       <th className="py-3 px-4">Register Number</th>
                       <th className="py-3 px-4">Candidate Name</th>
                       <th className="py-3 px-4">Status</th>

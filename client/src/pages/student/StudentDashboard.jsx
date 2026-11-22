@@ -17,7 +17,6 @@ import {
   Send,
   Info,
   ChevronRight,
-  Flame,
   Award,
   Check,
   ArrowRight
@@ -90,57 +89,61 @@ export default function StudentDashboard() {
     }
   };
 
-  // Format register number with spacing like credit card in image
-  const formatRegNo = (regNo) => {
-    if (!regNo) return '9100 2110 4001';
-    return regNo.replace(/(\d{4})/g, '$1 ').trim();
-  };
-
   return (
-    <DashboardLayout currentPath="/student" pageTitle="My Assessments">
+    <DashboardLayout currentPath="/student" pageTitle="My Examination Schedule">
       <div className="space-y-6">
-        {/* Top Header */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Candidate Hall-Ticket & Assessments
+              Candidate Examination Gateway
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Select an ongoing paper to begin proctored testing. Fullscreen and anti-cheat restrictions apply.
+              Select an active question paper to enter proctored testing. Strict fullscreen and single-device lock active.
             </p>
           </div>
           <button
             onClick={() => fetchStudentExams(true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-orange-500' : ''}`} />
-            <span>Refresh</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
+            <span>Sync</span>
           </button>
         </div>
 
-        {/* Candidate Official Identity Hall-Ticket Card - Styled exactly like Extej Card */}
-        <div className="smart-admit-card p-6 sm:p-7 max-w-xl extej-card">
+        {/* Candidate Official Hall-Ticket Card */}
+        <div className="hall-ticket-card p-6 sm:p-7 max-w-xl exam-card">
           <div className="flex items-center justify-between mb-4">
-            {/* Logo circles */}
-            <div className="flex items-center -space-x-2">
-              <div className="w-7 h-7 rounded-full bg-[#eb001b] opacity-90"></div>
-              <div className="w-7 h-7 rounded-full bg-[#f79e1b] opacity-90"></div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
+                <GraduationCap className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-900 block leading-tight">
+                  OFFICIAL ADMIT CARD
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Autonomous College Assessment
+                </span>
+              </div>
             </div>
-            {/* Verified badge */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
               <Check className="w-3.5 h-3.5 stroke-[3]" />
-              <span>OFFICIAL CANDIDATE</span>
+              <span>AUTHENTICATED</span>
             </div>
           </div>
 
-          {/* Register Number formatted like credit card */}
-          <div className="text-xl sm:text-2xl font-mono font-bold tracking-widest text-slate-900 my-3">
-            {formatRegNo(user?.register_number)}
+          <div className="my-3">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              Register Number
+            </span>
+            <div className="text-xl sm:text-2xl font-mono font-black tracking-widest text-slate-900">
+              {user?.register_number || '910021104001'}
+            </div>
           </div>
 
-          {/* Details */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-[11px]">
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-[11px]">
             <div>
               <span className="text-slate-400 block font-medium">Candidate Name</span>
               <span className="font-bold text-slate-800 uppercase">{user?.name || 'STUDENT'}</span>
@@ -150,7 +153,7 @@ export default function StudentDashboard() {
               <span className="font-bold text-slate-800">{user?.department || 'CSE'} - Yr {user?.year || 'IV'}</span>
             </div>
             <div className="text-right">
-              <span className="text-slate-400 block font-medium">Session Valid</span>
+              <span className="text-slate-400 block font-medium">Academic Year</span>
               <span className="font-bold text-slate-800">2026-27</span>
             </div>
           </div>
@@ -160,30 +163,30 @@ export default function StudentDashboard() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900">
               Active Question Papers ({exams.available.length})
             </h2>
           </div>
 
           {exams.available.length === 0 ? (
-            <div className="extej-card p-8 text-center text-slate-400 text-xs font-medium">
-              No active exams at this moment. Please check scheduled papers below.
+            <div className="exam-card p-8 text-center text-slate-400 text-xs font-medium">
+              No active examination papers at this moment. Scheduled papers will appear automatically when released.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {exams.available.map((exam) => (
                 <div
                   key={exam.id}
-                  className="extej-card p-6 flex flex-col justify-between hover:shadow-lg transition-all border-l-4 border-l-[#ff7a1a]"
+                  className="exam-card p-6 flex flex-col justify-between hover:shadow-md transition-all border-l-4 border-l-blue-600"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-[11px] font-bold uppercase tracking-wider">
+                      <span className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-mono font-bold">
                         {exam.course_code}
                       </span>
                       <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        LIVE NOW
+                        PAPER RELEASED
                       </span>
                     </div>
 
@@ -191,13 +194,13 @@ export default function StudentDashboard() {
                       {exam.title}
                     </h3>
 
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 my-3 py-2 bg-slate-50 rounded-xl px-3 border border-slate-100">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 my-3 py-2 bg-slate-50 rounded-xl px-3 border border-slate-100">
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{exam.duration_minutes} Mins</span>
+                        <span>{exam.duration_minutes} Minutes</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <ShieldAlert className="w-3.5 h-3.5 text-orange-500" />
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
                         <span>Max {exam.max_strikes} Strikes</span>
                       </div>
                     </div>
@@ -210,12 +213,12 @@ export default function StudentDashboard() {
                         className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         <AlertTriangle className="w-4 h-4 text-rose-500" />
-                        <span>Session Locked • Request Unlock</span>
+                        <span>Session Locked • Submit Appeal</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => setSelectedInstructionExam(exam)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
                         <PlayCircle className="w-4 h-4" />
                         <span>Enter Exam Cockpit</span>
@@ -231,12 +234,12 @@ export default function StudentDashboard() {
         {/* Section: Upcoming Papers */}
         {exams.upcoming.length > 0 && (
           <div className="space-y-4 pt-4">
-            <h2 className="text-lg font-bold text-slate-900">
-              Upcoming Scheduled Exams ({exams.upcoming.length})
+            <h2 className="text-base font-bold text-slate-900">
+              Upcoming Scheduled Papers ({exams.upcoming.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {exams.upcoming.map((exam) => (
-                <div key={exam.id} className="extej-card p-5">
+                <div key={exam.id} className="exam-card p-5">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-mono font-bold text-slate-500">{exam.course_code}</span>
                     <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
@@ -257,16 +260,16 @@ export default function StudentDashboard() {
         {/* Section: Completed Papers */}
         {exams.completed.length > 0 && (
           <div className="space-y-4 pt-4">
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900">
               Submitted Examination History ({exams.completed.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {exams.completed.map((exam) => (
-                <div key={exam.id} className="extej-card p-5 border-l-4 border-l-emerald-500">
+                <div key={exam.id} className="exam-card p-5 border-l-4 border-l-emerald-500">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-mono font-bold text-slate-500">{exam.course_code}</span>
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> SUBMITTED
+                      <Check className="w-3 h-3" /> SEALED & SUBMITTED
                     </span>
                   </div>
                   <h4 className="font-bold text-slate-800 text-sm mb-2">{exam.title}</h4>
@@ -274,7 +277,7 @@ export default function StudentDashboard() {
                     onClick={() => window.location.hash = '#/completed'}
                     className="w-full mt-2 py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold text-center transition-colors cursor-pointer"
                   >
-                    View Official Certificate
+                    View Official Digital Receipt
                   </button>
                 </div>
               ))}
@@ -285,10 +288,10 @@ export default function StudentDashboard() {
 
       {/* Rules / Pre-Exam Instructions Modal */}
       {selectedInstructionExam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="extej-card max-w-lg w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="exam-card max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-orange-100 text-[#ff7a1a] flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
@@ -299,21 +302,21 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            <div className="space-y-2.5 text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100 my-4">
+            <div className="space-y-2.5 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200/80 my-4">
               <div className="flex items-start gap-2">
-                <span className="text-orange-500 font-bold">•</span>
-                <span>The exam must run in <strong>Strict Fullscreen Mode</strong>.</span>
+                <span className="text-blue-600 font-bold">•</span>
+                <span>The exam must run in <strong>Strict Fullscreen Mode</strong> throughout the session.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-orange-500 font-bold">•</span>
-                <span>Tab switching, window resizing, or screen sharing triggers immediate violation strikes.</span>
+                <span className="text-blue-600 font-bold">•</span>
+                <span>Tab switching, window resizing, or external monitors trigger automatic malpractice strikes.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-orange-500 font-bold">•</span>
-                <span>Exceeding <strong>{selectedInstructionExam.max_strikes} strikes</strong> automatically locks your session.</span>
+                <span className="text-blue-600 font-bold">•</span>
+                <span>Exceeding <strong>{selectedInstructionExam.max_strikes} strikes</strong> automatically suspends your paper.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-orange-500 font-bold">•</span>
+                <span className="text-blue-600 font-bold">•</span>
                 <span>Your Register Number is dynamically watermarked across every page for leak forensics.</span>
               </div>
             </div>
@@ -333,9 +336,9 @@ export default function StudentDashboard() {
                   setSelectedInstructionExam(null);
                   handleStartExam(examId);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-bold shadow-md shadow-orange-500/25 hover:from-[#f06a0a] hover:to-[#ff831a] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>Accept & Start</span>
+                <span>Accept & Enter Cockpit</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -345,8 +348,8 @@ export default function StudentDashboard() {
 
       {/* Lockout Appeal Modal */}
       {resetModalExam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="extej-card max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="exam-card max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
             <h3 className="text-base font-bold text-slate-900 mb-2">
               Appeal Session Unlock
             </h3>
@@ -355,7 +358,7 @@ export default function StudentDashboard() {
             </p>
 
             {resetSuccessMessage ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200 text-center">
+              <div className="p-4 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200 text-center">
                 {resetSuccessMessage}
               </div>
             ) : (
@@ -370,7 +373,7 @@ export default function StudentDashboard() {
                     value={resetReason}
                     onChange={(e) => setResetReason(e.target.value)}
                     placeholder="Describe what occurred (e.g., accidental trackpad swipe, power interruption)..."
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500"
                   ></textarea>
                 </div>
 
@@ -385,7 +388,7 @@ export default function StudentDashboard() {
                   <button
                     type="submit"
                     disabled={submittingReset}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] text-white text-xs font-bold shadow-md shadow-orange-500/25 cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 cursor-pointer"
                   >
                     {submittingReset ? 'Submitting...' : 'Submit Appeal'}
                   </button>

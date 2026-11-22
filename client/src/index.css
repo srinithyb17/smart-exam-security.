@@ -12,7 +12,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     overflow-x: hidden;
-    background-color: #f4f6fa;
+    background-color: #f8fafc;
     color: #1e293b;
     font-family: var(--font-sans);
   }
@@ -34,58 +34,58 @@
   }
 }
 
-/* Extej Card Styling */
-.extej-card {
+/* Institutional Card Styling */
+.exam-card {
   background-color: #ffffff;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease-in-out;
 }
 
-.extej-card:hover {
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+.exam-card:hover {
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
 }
 
-.extej-card-active {
+.exam-card-accent {
   background-color: #ffffff;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(255, 122, 26, 0.3);
-  box-shadow: 0 4px 20px rgba(255, 122, 26, 0.08);
+  border-radius: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 16px -2px rgba(59, 130, 246, 0.08);
 }
 
-/* Orange gradient button & pills */
-.btn-orange-primary {
-  background: linear-gradient(135deg, #ff7a1a 0%, #ff9533 100%);
+/* Primary Action Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(255, 122, 26, 0.35);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: all 0.15s ease-in-out;
 }
-.btn-orange-primary:hover {
-  background: linear-gradient(135deg, #f06a0a 0%, #ff831a 100%);
-  box-shadow: 0 6px 20px rgba(255, 122, 26, 0.45);
-  transform: translateY(-1px);
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transform: translateY(-0.5px);
 }
 
-/* Credit / Admit Card Style */
-.smart-admit-card {
-  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+/* Official Hall-Ticket Card */
+.hall-ticket-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
   position: relative;
   overflow: hidden;
 }
 
-.smart-admit-card::before {
+.hall-ticket-card::before {
   content: '';
   position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 140px;
-  height: 140px;
+  top: -30px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 122, 26, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 

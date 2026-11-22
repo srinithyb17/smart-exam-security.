@@ -236,8 +236,8 @@ export default function ExamScreen({ examId }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f4f6fa] flex flex-col items-center justify-center p-4 text-slate-800">
-        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 text-slate-800">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
         <h2 className="text-xl font-bold tracking-tight">Initializing Examination Cockpit...</h2>
         <p className="text-slate-400 text-xs mt-1">
           Verifying Single-Device Lock & Syncing Anti-Malpractice Telemetry
@@ -248,8 +248,8 @@ export default function ExamScreen({ examId }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f4f6fa] flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full extej-card p-8 text-center shadow-xl">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full exam-card p-8 text-center shadow-xl">
           <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
             <Lock className="w-7 h-7 text-rose-500" />
           </div>
@@ -269,8 +269,8 @@ export default function ExamScreen({ examId }) {
   // Session LOCKED View
   if (isLocked) {
     return (
-      <div className="min-h-screen bg-[#f4f6fa] flex items-center justify-center p-4">
-        <div className="max-w-lg w-full extej-card p-8 text-center shadow-2xl border-rose-200">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full exam-card p-8 text-center shadow-2xl border-rose-200">
           <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8 text-rose-600 animate-pulse" />
           </div>
@@ -312,7 +312,7 @@ export default function ExamScreen({ examId }) {
                   value={resetReason}
                   onChange={(e) => setResetReason(e.target.value)}
                   placeholder="Explain why your window lost focus or session was interrupted..."
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:outline-none focus:bg-white focus:border-orange-500"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:outline-none focus:bg-white focus:border-blue-500"
                 />
               </div>
 
@@ -326,7 +326,7 @@ export default function ExamScreen({ examId }) {
                 <button
                   type="submit"
                   disabled={!resetReason.trim()}
-                  className="py-2.5 px-6 bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] rounded-xl text-xs font-bold text-white shadow-md shadow-orange-500/25 transition disabled:opacity-50 cursor-pointer"
+                  className="py-2.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-xs font-bold text-white shadow-md shadow-blue-500/25 transition disabled:opacity-50 cursor-pointer"
                 >
                   Transmit Appeal
                 </button>
@@ -340,10 +340,10 @@ export default function ExamScreen({ examId }) {
 
   return (
     <FullscreenGuard isExamActive={true} onFullscreenExit={handleFullscreenExit}>
-      <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col select-none relative overflow-hidden">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col select-none relative overflow-hidden">
         {/* Anti-Screen Peek Blur Mask */}
         {isWindowBlurred && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-xl">
               <ShieldAlert className="w-8 h-8 text-rose-500 animate-pulse" />
             </div>
@@ -376,7 +376,7 @@ export default function ExamScreen({ examId }) {
                 </p>
                 <div className="mt-2 flex items-center justify-between text-[11px] font-mono">
                   <span className="text-slate-400">{recentViolationToast.time}</span>
-                  <span className="text-orange-600 font-bold">
+                  <span className="text-amber-600 font-bold">
                     Strikes: {violationsCount} / {maxViolations}
                   </span>
                 </div>
@@ -386,22 +386,22 @@ export default function ExamScreen({ examId }) {
         )}
 
         {/* Master Examination Control Header */}
-        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20 shadow-sm">
+        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20 shadow-xs">
           {/* Left: Exam Details */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff4d2e] to-[#ff8f3d] flex items-center justify-center shadow-md shadow-orange-500/25 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
               <FileCheck className="w-4 h-4 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700 border border-orange-200 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-mono font-bold">
                   {exam?.exam_code}
                 </span>
                 <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate max-w-[180px] sm:max-w-md">
                   {exam?.title}
                 </h2>
               </div>
-              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+              <p className="text-[11px] text-slate-500 font-mono mt-0.5">
                 Candidate: <strong className="text-slate-700">{user?.register_number}</strong> ({user?.name})
               </p>
             </div>
@@ -414,7 +414,7 @@ export default function ExamScreen({ examId }) {
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border font-mono text-xs sm:text-sm font-bold tracking-wider ${
                 remainingSeconds !== null && remainingSeconds < 300
                   ? 'bg-rose-50 border-rose-200 text-rose-600 animate-pulse'
-                  : 'bg-orange-50 border-orange-200 text-orange-700'
+                  : 'bg-blue-50 border-blue-200 text-blue-700'
               }`}
             >
               <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -424,7 +424,7 @@ export default function ExamScreen({ examId }) {
             {/* Strike Indicator Capsule */}
             <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
               <span className="text-slate-400">Strikes:</span>
-              <span className={`font-bold ${violationsCount > 0 ? 'text-orange-600' : 'text-slate-700'}`}>
+              <span className={`font-bold ${violationsCount > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
                 {violationsCount}/{maxViolations}
               </span>
             </div>
@@ -432,7 +432,7 @@ export default function ExamScreen({ examId }) {
             {/* Finish & Submit Button */}
             <button
               onClick={() => setShowSubmitModal(true)}
-              className="py-2 px-4 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="py-2 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <CheckCircle className="w-4 h-4" />
               <span>Submit Paper</span>
@@ -453,10 +453,10 @@ export default function ExamScreen({ examId }) {
 
         {/* Submit Confirmation Dialog */}
         {showSubmitModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full extej-card p-7 shadow-2xl relative">
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="w-6 h-6 text-[#ff7a1a]" />
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="max-w-md w-full exam-card p-7 shadow-2xl relative">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-6 h-6 text-blue-600" />
               </div>
 
               <h3 className="text-lg font-bold text-slate-900 text-center mb-1">
@@ -478,7 +478,7 @@ export default function ExamScreen({ examId }) {
                   type="button"
                   disabled={submitting}
                   onClick={handleFinalSubmit}
-                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#ff7a1a] to-[#ff9533] hover:from-[#f06a0a] hover:to-[#ff831a] text-white text-xs font-bold shadow-md shadow-orange-500/25 cursor-pointer"
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 cursor-pointer"
                 >
                   {submitting ? 'Submitting...' : 'Confirm Submit'}
                 </button>
