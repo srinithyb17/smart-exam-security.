@@ -64,6 +64,7 @@ export default function ExamManagement() {
       Object.keys(examForm).forEach((key) => {
         formData.append(key, examForm[key]);
       });
+      formData.set('subject', examForm.subject || examForm.title || 'General Assessment');
       if (paperFile) {
         formData.append('paper', paperFile);
       }

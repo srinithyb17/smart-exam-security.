@@ -11,18 +11,11 @@ import {
   Eye,
   CheckCircle,
   Plus,
-  Upload,
   RefreshCw,
-  ExternalLink,
   ChevronRight,
-  TrendingUp,
-  Radio,
-  Sparkles,
-  ArrowUpRight,
   ShieldCheck,
   FileCheck,
-  Layers,
-  Lock
+  ArrowRight
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -37,7 +30,6 @@ export default function AdminDashboard() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [timeFilter, setTimeFilter] = useState('Today');
 
   const loadDashboardData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -49,7 +41,7 @@ export default function AdminDashboard() {
       ]);
 
       const examsList = examsRes.exams || [];
-      const totalStudents = studentsRes.pagination?.total || 5;
+      const totalStudents = studentsRes.pagination?.total || 0;
       const alerts = alertsRes.alerts || [];
 
       let activeSessions = 0;
@@ -57,7 +49,7 @@ export default function AdminDashboard() {
       let activeExamsCount = 0;
 
       const now = new Date().toISOString();
-      examsList.forEach(e => {
+      examsList.forEach((e) => {
         activeSessions += (e.active_sessions || 0);
         pendingResets += (e.pending_resets || 0);
         if (now >= e.start_time && now <= e.end_time) {
@@ -84,21 +76,21 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    const interval = setInterval(() => loadDashboardData(), 8000);
+    const interval = setInterval(() => loadDashboardData(), 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <DashboardLayout currentPath="/admin" pageTitle="Executive Examination Overview">
+    <DashboardLayout currentPath="/admin" pageTitle="Dashboard">
       <div className="space-y-6">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Executive Examination Overview
+              Examination Control Dashboard
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Controller of Examinations proctoring cockpit • High-concurrency telemetry & forensic auditing
+              Live proctoring telemetry, candidate tracking, and question paper security overview
             </p>
           </div>
 
@@ -109,7 +101,7 @@ export default function AdminDashboard() {
               className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
-              <span>Sync Telemetry</span>
+              <span>Refresh</span>
             </button>
 
             <a
@@ -117,78 +109,50 @@ export default function AdminDashboard() {
               className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-4 py-2 rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>+ New Exam</span>
+              <span>+ Create Exam</span>
             </a>
           </div>
         </div>
 
-        {/* Top Row: 4 Real Examination KPI Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {/* Card 1: Active Concurrency */}
-          <div className="exam-card p-5 flex flex-col justify-between">
+        {/* Real-Time KPI Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Active Candidates */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Live Concurrency
+                  Active Examinees
                 </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                   {stats.activeSessions}
                 </span>
-                <span className="text-xs font-semibold text-slate-400">/ 1,000 Capacity</span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden my-3">
-                <div
-                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.max(5, (stats.activeSessions / 1000) * 100)}%` }}
-                ></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>WASM In-Memory Engine</span>
-              <span className="text-emerald-600 font-bold">100% Free</span>
-            </div>
-          </div>
-
-          {/* Card 2: Security & Integrity Index */}
-          <div className="exam-card p-5 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Session Integrity
-                </span>
-                <span className="p-1 rounded-md bg-blue-50 text-blue-600">
-                  <ShieldCheck className="w-4 h-4" />
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                  Online Now
                 </span>
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-blue-600 tracking-tight">
-                  99.8%
-                </span>
-                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-100">
-                  Optimal
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 my-3">
-                Strict Fullscreen & Single Device Lock enforced.
+              <p className="text-xs text-slate-500 mt-2">
+                Real-time active proctoring sessions
               </p>
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>DevTools Guard:</span>
-              <span className="text-slate-800 font-bold">Blocked</span>
+            <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">Live Cockpit:</span>
+              <a href="#/admin/monitor" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                Monitor Live →
+              </a>
             </div>
           </div>
 
-          {/* Card 3: Question Papers & Schedules */}
-          <div className="exam-card p-5 flex flex-col justify-between">
+          {/* Card 2: Active Exam Papers */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Examination Papers
                 </span>
-                <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
+                <span className="p-1 rounded-md bg-blue-50 text-blue-600">
                   <FileText className="w-4 h-4" />
                 </span>
               </div>
@@ -196,28 +160,61 @@ export default function AdminDashboard() {
                 <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                   {stats.totalExams}
                 </span>
-                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
-                  {stats.activeExams} Active Now
+                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                  {stats.activeExams} Ongoing
                 </span>
               </div>
-              <p className="text-xs text-slate-500 my-3">
-                AES Encrypted & Dynamic Canvas Watermark.
+              <p className="text-xs text-slate-500 mt-2">
+                Encrypted question papers configured
               </p>
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Active Subject:</span>
-              <span className="text-slate-800 font-bold font-mono">CS8591</span>
+            <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">Manage Papers:</span>
+              <a href="#/admin/exams" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                View Schedule →
+              </a>
             </div>
           </div>
 
-          {/* Card 4: Candidates & Appeals */}
-          <div className="exam-card p-5 flex flex-col justify-between">
+          {/* Card 3: Unlock Appeals */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Unlock Appeals
+                </span>
+                <span className={`p-1 rounded-md ${stats.pendingResets > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                  <AlertTriangle className="w-4 h-4" />
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className={`text-3xl font-extrabold tracking-tight ${stats.pendingResets > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+                  {stats.pendingResets}
+                </span>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${stats.pendingResets > 0 ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                  {stats.pendingResets > 0 ? 'Action Required' : 'All Clear'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Locked candidates awaiting invigilator review
+              </p>
+            </div>
+            <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">Review Queue:</span>
+              <a href="#/admin/resets" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                Open Queue →
+              </a>
+            </div>
+          </div>
+
+          {/* Card 4: Registered Candidates */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   Candidate Roster
                 </span>
-                <span className="p-1 rounded-md bg-amber-50 text-amber-600">
+                <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
                   <Users className="w-4 h-4" />
                 </span>
               </div>
@@ -225,130 +222,50 @@ export default function AdminDashboard() {
                 <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                   {stats.totalStudents}
                 </span>
-                <span className="text-xs font-semibold text-slate-400">Enrolled</span>
+                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                  Enrolled
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 my-3">
-                {stats.pendingResets > 0 ? (
-                  <span className="text-amber-600 font-bold flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    {stats.pendingResets} unlock appeals pending
-                  </span>
-                ) : (
-                  <span className="text-slate-500">Zero pending lockout appeals</span>
-                )}
-              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Registered student credentials
+              </p>
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Appeals Desk:</span>
-              <a href="#/admin/resets" className="text-blue-600 font-bold hover:underline">
-                Review Queue →
+            <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">Directory:</span>
+              <a href="#/admin/students" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                Manage Students →
               </a>
             </div>
           </div>
         </div>
 
-        {/* Middle Section: Real-Time Candidate Concurrency Telemetry Chart */}
-        <div className="exam-card p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">
-                Examination Concurrency & System Throughput
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Real-time synchronized candidate connections, active PDF rendering heartbeats, and submission curve
-              </p>
+        {/* Quick Access Action Banner */}
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <h2 className="text-lg font-bold">Live Examination Proctoring Cockpit</h2>
             </div>
-
-            {/* Time Filter Pills */}
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-              {['Today', '3 Hours', 'Peak Load', 'Historical'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setTimeFilter(filter)}
-                  className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    timeFilter === filter
-                      ? 'bg-white text-blue-600 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
+            <p className="text-xs text-blue-100 max-w-xl">
+              Monitor active candidates in real time. Handle focus violations, manual unlock re-admissions, and emergency submissions with one click.
+            </p>
           </div>
-
-          {/* SVG Concurrency Curve */}
-          <div className="relative w-full h-56 pt-2">
-            {/* Floating Tooltip Indicator */}
-            <div className="absolute right-[25%] top-2 bg-white rounded-xl shadow-md border border-slate-200 px-3 py-1.5 z-10 flex flex-col items-center">
-              <span className="text-[10px] text-slate-400 font-medium font-mono">CONCURRENT LOAD</span>
-              <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900">
-                <span>942 Candidates Online</span>
-                <span className="text-emerald-600 text-[10px] font-bold">0ms Latency</span>
-              </div>
-              <div className="w-0.5 h-6 bg-blue-500 -mb-6 mt-1"></div>
-            </div>
-
-            {/* SVG Area Chart */}
-            <svg viewBox="0 0 800 200" className="w-full h-40 overflow-visible" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="concurrencyGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563eb" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-
-              <line x1="0" y1="40" x2="800" y2="40" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="0" y1="90" x2="800" y2="90" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="0" y1="140" x2="800" y2="140" stroke="#f1f5f9" strokeWidth="1" />
-
-              {/* Area path */}
-              <path
-                d="M0,150 Q120,140 200,90 T380,50 T560,45 T600,48 L600,200 L0,200 Z"
-                fill="url(#concurrencyGradient)"
-              />
-              <path
-                d="M600,48 Q680,60 740,110 T800,160 L800,200 L600,200 Z"
-                fill="url(#concurrencyGradient)"
-              />
-
-              {/* Smooth curve line */}
-              <path
-                d="M0,150 Q120,140 200,90 T380,50 T560,45 T600,48"
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <path
-                d="M600,48 Q680,60 740,110 T800,160"
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-
-              {/* Peak indicator dot */}
-              <circle cx="600" cy="48" r="4.5" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
-            </svg>
-
-            {/* X-Axis Timestamps */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-3 px-2">
-              <span>09:00 AM (Paper Released)</span>
-              <span>10:00 AM (Reading & Writing)</span>
-              <span>11:00 AM (Mid-Session Peak)</span>
-              <span>12:00 PM (Submission Window)</span>
-            </div>
-          </div>
+          <a
+            href="#/admin/monitor"
+            className="py-2.5 px-5 bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs rounded-xl shadow-sm transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Launch Live Cockpit</span>
+          </a>
         </div>
 
-        {/* Bottom Section: Active Question Papers & Real-Time Alerts Feed */}
+        {/* Bottom Section: Active Question Papers & Security Alerts Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Column 1: Active Examination Papers */}
-          <div className="lg:col-span-7 exam-card p-5 sm:p-6">
+          {/* Active Question Papers */}
+          <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <FileCheck className="w-4 h-4 text-blue-600" />
                 <h3 className="font-bold text-slate-900 text-sm">
                   Active Examination Papers ({exams.length})
                 </h3>
@@ -357,28 +274,28 @@ export default function AdminDashboard() {
                 href="#/admin/exams"
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                <span>Manage Papers</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>View All</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
 
             <div className="space-y-3">
               {exams.length === 0 ? (
                 <div className="p-8 text-center text-slate-400 text-xs">
-                  No active examination papers scheduled.
+                  No active examination papers scheduled yet.
                 </div>
               ) : (
-                exams.map((exam) => (
+                exams.slice(0, 4).map((exam) => (
                   <div
                     key={exam.id}
-                    className="p-4 rounded-xl border border-slate-200/80 hover:border-blue-300 transition-all bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    className="p-4 rounded-xl border border-slate-200/90 hover:border-blue-300 transition-all bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 font-mono text-[11px] font-bold">
                           {exam.exam_code}
                         </span>
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-slate-500 font-medium">
                           {exam.department}
                         </span>
                       </div>
@@ -386,7 +303,7 @@ export default function AdminDashboard() {
                         {exam.title}
                       </h4>
                       <p className="text-[11px] text-slate-500 mt-0.5">
-                        Duration: {exam.duration_minutes} Mins • Strike Tolerance: {exam.max_violations} strikes
+                        Duration: {exam.duration_minutes} Mins • Max Strikes: {exam.max_violations}
                       </p>
                     </div>
 
@@ -403,20 +320,21 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Column 2: Live Forensic Security Feed */}
-          <div className="lg:col-span-5 exam-card p-5 sm:p-6">
+          {/* Live Forensic Security Feed */}
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-orange-500" />
+                <ShieldAlert className="w-4 h-4 text-rose-500" />
                 <h3 className="font-bold text-slate-900 text-sm">
-                  Live Forensic Security Feed
+                  Recent Security Events
                 </h3>
               </div>
               <a
                 href="#/admin/security"
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                Full Audit Trail →
+                <span>Full Audit</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
 

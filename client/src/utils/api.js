@@ -53,5 +53,6 @@ export const api = {
   post: (endpoint, body) => apiRequest(endpoint, { method: 'POST', body }),
   put: (endpoint, body) => apiRequest(endpoint, { method: 'PUT', body }),
   delete: (endpoint) => apiRequest(endpoint, { method: 'DELETE' }),
+  upload: (endpoint, formData) => apiRequest(endpoint, { method: 'POST', body: formData }),
 };
 

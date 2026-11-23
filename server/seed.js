@@ -106,10 +106,10 @@ startxref
 
   // 4. Seed Active Sample Exam
   const existingExam = db.prepare('SELECT id FROM exams WHERE exam_code = ?').get('CS8591');
-  if (!existingExam) {
-    const startTime = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // Started 10 mins ago
-    const endTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(); // Ends in 3 hours
+  const startTime = new Date(Date.now() - 15 * 60 * 1000).toISOString(); // Started 15 mins ago
+  const endTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // Active for 24h
 
+  if (!existingExam) {
     db.prepare(`
       INSERT INTO exams (
         exam_code, title, subject, department, start_time, end_time,
@@ -130,14 +130,19 @@ startxref
     );
     console.log('✅ Created active sample exam: "CS8591 - Computer Networks"');
   } else {
-    console.log('ℹ️ Sample exam CS8591 already exists');
+    db.prepare('UPDATE exams SET start_time = ?, end_time = ? WHERE exam_code = ?').run(startTime, endTime, 'CS8591');
+    console.log('ℹ️ Refreshed active exam window for CS8591 (active for 24h)');
   }
 
   db.saveToDisk();
   console.log('🎉 Seeding completed successfully! Database saved to disk.');
 }
 
-seed().catch(err => {
-  console.error('Seeding error:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seed().catch(err => {
+    console.error('Seeding error:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = seed;

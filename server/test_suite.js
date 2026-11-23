@@ -79,7 +79,7 @@ async function runTestSuite() {
   });
   const examsData = await examsRes.json();
   assert.ok(examsData.exams.length > 0, 'Exams list should contain at least 1 seeded exam');
-  const sampleExam = examsData.exams[0];
+  const sampleExam = examsData.exams.find(e => e.exam_code === 'CS8591') || examsData.exams[0];
   console.log(`✅ Test 6: Exam Query OK (Exam: ${sampleExam.exam_code} - ${sampleExam.title})`);
 
   // 6. Protected PDF Access Restriction (Unauthenticated should be 401)
