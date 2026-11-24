@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const uuidv4 = () => crypto.randomUUID();
 const fs = require('fs');
 
 // Storage for Question Paper PDFs (Stored securely outside public access)

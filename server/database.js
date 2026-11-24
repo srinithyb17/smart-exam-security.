@@ -2,7 +2,8 @@ const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'smart_exam.db');
+const bundledDbPath = path.join(__dirname, 'smart_exam.db');
+const dbPath = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/smart_exam.db' : bundledDbPath);
 
 let rawDb = null;
 let saveTimeout = null;
@@ -135,11 +136,30 @@ const db = {
     if (rawDb) return rawDb;
 
     const SQL = await initSqlJs({
-      locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
+      locateFile: file => {
+        const localServer = path.join(__dirname, file);
+        if (fs.existsSync(localServer)) return localServer;
+        const localApi = path.join(__dirname, '..', 'api', file);
+        if (fs.existsSync(localApi)) return localApi;
+        try {
+          return path.join(path.dirname(require.resolve('sql.js')), file);
+        } catch (_) {
+          return path.join(__dirname, 'node_modules', 'sql.js', 'dist', file);
+        }
+      }
     });
+
+    if (process.env.VERCEL && !fs.existsSync(dbPath) && fs.existsSync(bundledDbPath)) {
+      try {
+        fs.copyFileSync(bundledDbPath, dbPath);
+      } catch (_) {}
+    }
 
     if (fs.existsSync(dbPath)) {
       const fileBuffer = fs.readFileSync(dbPath);
+      rawDb = new SQL.Database(fileBuffer);
+    } else if (fs.existsSync(bundledDbPath)) {
+      const fileBuffer = fs.readFileSync(bundledDbPath);
       rawDb = new SQL.Database(fileBuffer);
     } else {
       rawDb = new SQL.Database();
@@ -226,10 +246,70 @@ const db = {
     `);
 
     // Ensure storage folders exist
-    const papersDir = path.join(__dirname, 'storage', 'papers');
-    const uploadsDir = path.join(__dirname, 'storage', 'uploads');
-    if (!fs.existsSync(papersDir)) fs.mkdirSync(papersDir, { recursive: true });
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    try {
+      const papersDir = process.env.VERCEL ? '/tmp/storage/papers' : path.join(__dirname, 'storage', 'papers');
+      const uploadsDir = process.env.VERCEL ? '/tmp/storage/uploads' : path.join(__dirname, 'storage', 'uploads');
+      if (!fs.existsSync(papersDir)) fs.mkdirSync(papersDir, { recursive: true });
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    } catch (_) {}
+
+    // Ensure default admin, students, and sample exam exist
+    try {
+      const bcrypt = require('bcryptjs');
+      const adminRes = rawDb.exec('SELECT count(*) FROM admins');
+      const adminCount = (adminRes && adminRes[0] && adminRes[0].values && adminRes[0].values[0]) ? adminRes[0].values[0][0] : 0;
+      if (adminCount === 0) {
+        const adminPass = bcrypt.hashSync('admin123', 10);
+        rawDb.run(
+          'INSERT INTO admins (username, password_hash, name, email, role) VALUES (?, ?, ?, ?, ?)',
+          ['admin', adminPass, 'Chief Examination Officer', 'examcell@college.edu', 'admin']
+        );
+      }
+
+      const studentRes = rawDb.exec('SELECT count(*) FROM students');
+      const studentCount = (studentRes && studentRes[0] && studentRes[0].values && studentRes[0].values[0]) ? studentRes[0].values[0][0] : 0;
+      if (studentCount === 0) {
+        const studentPass = bcrypt.hashSync('student123', 10);
+        const sampleStudents = [
+          ['910021104001', 'Aarav Sharma', 'aarav@clg.edu', 'CSE', 'IV', 'A', studentPass],
+          ['910021104002', 'Bhavya Patel', 'bhavya@clg.edu', 'CSE', 'IV', 'A', studentPass],
+          ['910021104003', 'Chirag Reddy', 'chirag@clg.edu', 'ECE', 'IV', 'B', studentPass]
+        ];
+        sampleStudents.forEach(st => {
+          rawDb.run(
+            'INSERT OR IGNORE INTO students (register_number, name, email, department, year, section, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            st
+          );
+        });
+      }
+
+      const examRes = rawDb.exec('SELECT count(*) FROM exams');
+      const examCount = (examRes && examRes[0] && examRes[0].values && examRes[0].values[0]) ? examRes[0].values[0][0] : 0;
+      if (examCount === 0) {
+        const startTime = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        const endTime = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
+        rawDb.run(`
+          INSERT INTO exams (
+            exam_code, title, subject, department, start_time, end_time,
+            duration_minutes, max_violations, paper_filename, paper_original_name, instructions, is_active
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        `, [
+          'CS8591',
+          'Computer Networks Semester Examination',
+          'Computer Networks',
+          'CSE',
+          startTime,
+          endTime,
+          180,
+          3,
+          'sample_cs8591_paper.pdf',
+          'CS8591_Question_Paper_2026.pdf',
+          '1. Fullscreen mode is mandatory throughout the examination.\n2. Exceeding 3 violations will automatically lock the exam session.'
+        ]);
+      }
+    } catch (e) {
+      console.warn('Auto-seed notice:', e.message);
+    }
 
     saveToDisk();
     return rawDb;

@@ -202,7 +202,7 @@ export default function ExamScreen({ examId }) {
   const handleFinalSubmit = async () => {
     setSubmitting(true);
     try {
-      await api.post(`/sessions/${sessionId}/submit`, { sessionToken });
+      await api.post(`/sessions/${sessionId}/submit`, { examId, sessionToken });
       sessionStorage.removeItem(`exam_token_${examId}`);
       window.location.hash = '#/completed';
     } catch (err) {

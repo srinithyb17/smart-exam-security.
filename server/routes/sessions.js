@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const uuidv4 = () => crypto.randomUUID();
 const db = require('../database');
 const { authenticateToken, requireAdmin, requireStudent } = require('../middleware/auth');
 
@@ -151,7 +152,7 @@ router.post('/start', authenticateToken, requireStudent, (req, res) => {
 });
 
 // Student: Periodic Heartbeat (every 15-20s)
-router.post('/heartbeat', authenticateToken, requireStudent, (req, res) => {
+router.post(['/heartbeat', '/:sessionId/heartbeat'], authenticateToken, requireStudent, (req, res) => {
   try {
     const { examId, sessionToken } = req.body;
     const studentId = req.user.id;
@@ -237,7 +238,7 @@ router.post('/heartbeat', authenticateToken, requireStudent, (req, res) => {
 });
 
 // Student: Submit exam
-router.post('/submit', authenticateToken, requireStudent, (req, res) => {
+router.post(['/submit', '/:sessionId/submit'], authenticateToken, requireStudent, (req, res) => {
   try {
     const { examId, sessionToken } = req.body;
     const studentId = req.user.id;
@@ -255,7 +256,7 @@ router.post('/submit', authenticateToken, requireStudent, (req, res) => {
       UPDATE exam_sessions SET status = 'SUBMITTED', end_time = CURRENT_TIMESTAMP WHERE id = ?
     `).run(session.id);
 
-    logSecurityEvent(examId, studentId, 'EXAM_SUBMITTED', 'LOW', 'Student completed and submitted exam', ip);
+    logSecurityEvent(session.exam_id, studentId, 'EXAM_SUBMITTED', 'LOW', 'Student completed and submitted exam', ip);
 
     res.json({ message: 'Exam submitted successfully' });
   } catch (err) {
@@ -265,7 +266,7 @@ router.post('/submit', authenticateToken, requireStudent, (req, res) => {
 });
 
 // Student: Session Interruption (browser closed, tab closed, crash)
-router.post('/interrupt', authenticateToken, requireStudent, (req, res) => {
+router.post(['/interrupt', '/:sessionId/interrupt'], authenticateToken, requireStudent, (req, res) => {
   try {
     const { examId, sessionToken } = req.body;
     const studentId = req.user.id;
