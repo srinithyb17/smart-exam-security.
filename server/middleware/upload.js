@@ -4,12 +4,27 @@ const crypto = require('crypto');
 const uuidv4 = () => crypto.randomUUID();
 const fs = require('fs');
 
+const getPapersDir = () => {
+  const dir = process.env.VERCEL ? '/tmp/storage/papers' : path.join(__dirname, '..', 'storage', 'papers');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+};
+
+const getUploadsDir = () => {
+  const dir = process.env.VERCEL ? '/tmp/storage/uploads' : path.join(__dirname, '..', 'storage', 'uploads');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+};
+
 // Storage for Question Paper PDFs (Stored securely outside public access)
 const paperStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'storage', 'papers');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+    try {
+      const dir = getPapersDir();
+      cb(null, dir);
+    } catch (err) {
+      cb(err);
+    }
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -34,9 +49,12 @@ const uploadPaper = multer({
 // Storage for CSV student bulk upload
 const uploadCsvStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'storage', 'uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+    try {
+      const dir = getUploadsDir();
+      cb(null, dir);
+    } catch (err) {
+      cb(err);
+    }
   },
   filename: (req, file, cb) => {
     cb(null, `students_${uuidv4()}_${Date.now()}.csv`);
@@ -50,5 +68,7 @@ const uploadCsv = multer({
 
 module.exports = {
   uploadPaper,
-  uploadCsv
+  uploadCsv,
+  getPapersDir,
+  getUploadsDir
 };

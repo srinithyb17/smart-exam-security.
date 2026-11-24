@@ -6,6 +6,23 @@ const db = require('../database');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { uploadPaper } = require('../middleware/upload');
 
+const getPaperFilePath = (filename) => {
+  if (!filename) return null;
+  const tmpPath = path.join('/tmp', 'storage', 'papers', filename);
+  if (fs.existsSync(tmpPath)) return tmpPath;
+  const localPath = path.join(__dirname, '..', 'storage', 'papers', filename);
+  if (fs.existsSync(localPath)) return localPath;
+  return tmpPath;
+};
+
+const deletePaperFile = (filename) => {
+  if (!filename) return;
+  const tmpPath = path.join('/tmp', 'storage', 'papers', filename);
+  const localPath = path.join(__dirname, '..', 'storage', 'papers', filename);
+  if (fs.existsSync(tmpPath)) { try { fs.unlinkSync(tmpPath); } catch (_) {} }
+  if (fs.existsSync(localPath)) { try { fs.unlinkSync(localPath); } catch (_) {} }
+};
+
 // Admin - Get all exams with comprehensive statistics
 router.get('/', authenticateToken, requireAdmin, (req, res) => {
   try {
@@ -113,14 +130,14 @@ router.post('/', authenticateToken, requireAdmin, uploadPaper.single('paper'), (
     const resolvedSubject = (subject && subject.trim()) || (title && title.trim()) || 'General Assessment';
 
     if (!exam_code || !title || !start_time || !end_time || !duration_minutes) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch (_) {} }
       return res.status(400).json({ error: 'Missing required exam fields' });
     }
 
     const code = exam_code.trim().toUpperCase();
     const existing = db.prepare('SELECT id FROM exams WHERE exam_code = ?').get(code);
     if (existing) {
-      if (req.file) fs.unlinkSync(req.file.path);
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch (_) {} }
       return res.status(400).json({ error: 'Exam with this code already exists' });
     }
 
@@ -188,8 +205,7 @@ router.put('/:id', authenticateToken, requireAdmin, uploadPaper.single('paper'),
     if (req.file) {
       // Delete old paper if exists
       if (exam.paper_filename) {
-        const oldPath = path.join(__dirname, '..', 'storage', 'papers', exam.paper_filename);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        deletePaperFile(exam.paper_filename);
       }
       paper_filename = req.file.filename;
       paper_original_name = req.file.originalname;
@@ -244,10 +260,7 @@ router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
 
     if (exam.paper_filename) {
-      const paperPath = path.join(__dirname, '..', 'storage', 'papers', exam.paper_filename);
-      if (fs.existsSync(paperPath)) {
-        try { fs.unlinkSync(paperPath); } catch (_) {}
-      }
+      deletePaperFile(exam.paper_filename);
     }
 
     db.prepare('DELETE FROM exams WHERE id = ?').run(id);
@@ -269,8 +282,8 @@ router.get('/:id/paper', authenticateToken, (req, res) => {
       return res.status(404).json({ error: 'Question paper not found for this exam' });
     }
 
-    const paperPath = path.join(__dirname, '..', 'storage', 'papers', exam.paper_filename);
-    if (!fs.existsSync(paperPath)) {
+    const paperPath = getPaperFilePath(exam.paper_filename);
+    if (!paperPath || !fs.existsSync(paperPath)) {
       return res.status(404).json({ error: 'Paper file missing on server' });
     }
 
