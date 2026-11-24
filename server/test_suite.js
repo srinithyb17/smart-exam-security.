@@ -55,6 +55,8 @@ async function runTestSuite() {
       section: 'A'
     })
   });
+  const addStudentData = await addStudentRes.json();
+  const createdTestStudentId = addStudentData.student?.id;
   assert.strictEqual(addStudentRes.status, 201, 'Student creation should return 201');
   console.log('✅ Test 4: Student Registration OK');
 
@@ -275,11 +277,13 @@ async function runTestSuite() {
   assert.ok(csvText.includes('910021104001'), 'CSV must contain student register number');
   console.log('✅ Test 17: Official CSV Report Generation & Download OK');
 
-  // Clean up test student
-  await fetch(`${BASE_URL}/students/${studentId}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${adminToken}` }
-  }).catch(() => {});
+  // Clean up temporary test student
+  if (createdTestStudentId) {
+    await fetch(`${BASE_URL}/students/${createdTestStudentId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    }).catch(() => {});
+  }
 
   console.log('\n🎉 ALL 17 AUTOMATED INTEGRATION TESTS PASSED WITH 100% SUCCESS!');
 }
