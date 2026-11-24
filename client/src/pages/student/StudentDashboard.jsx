@@ -54,7 +54,7 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     fetchStudentExams();
-    const interval = setInterval(() => fetchStudentExams(), 15000);
+    const interval = setInterval(() => fetchStudentExams(), 5000);
     return () => clearInterval(interval);
   }, []);
 

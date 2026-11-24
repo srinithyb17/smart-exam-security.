@@ -74,6 +74,15 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await db.init();
+    
+    // Auto-seed if database is empty
+    const adminCheck = db.prepare('SELECT COUNT(*) as count FROM admins').get();
+    const studentCheck = db.prepare('SELECT COUNT(*) as count FROM students').get();
+    if (!adminCheck || adminCheck.count === 0 || !studentCheck || studentCheck.count === 0) {
+      const seed = require('./seed');
+      await seed();
+    }
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`====================================================`);
       console.log(`🚀 Smart Exam Security Server is running on port ${PORT}`);

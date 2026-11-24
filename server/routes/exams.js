@@ -110,7 +110,9 @@ router.post('/', authenticateToken, requireAdmin, uploadPaper.single('paper'), (
       instructions
     } = req.body;
 
-    if (!exam_code || !title || !subject || !start_time || !end_time || !duration_minutes) {
+    const resolvedSubject = (subject && subject.trim()) || (title && title.trim()) || 'General Assessment';
+
+    if (!exam_code || !title || !start_time || !end_time || !duration_minutes) {
       if (req.file) fs.unlinkSync(req.file.path);
       return res.status(400).json({ error: 'Missing required exam fields' });
     }
@@ -133,7 +135,7 @@ router.post('/', authenticateToken, requireAdmin, uploadPaper.single('paper'), (
     `).run(
       code,
       title.trim(),
-      subject.trim(),
+      resolvedSubject,
       department || null,
       start_time,
       end_time,

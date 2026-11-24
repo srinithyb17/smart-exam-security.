@@ -154,7 +154,11 @@ export default function LiveExamMonitor() {
     const matchSearch =
       s.register_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.student_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStatus = statusFilter ? s.status === statusFilter : true;
+    let matchStatus = true;
+    if (statusFilter === 'IN_PROGRESS') matchStatus = s.status === 'IN_PROGRESS';
+    else if (statusFilter === 'LOCKED') matchStatus = s.status === 'LOCKED';
+    else if (statusFilter === 'APPEALS') matchStatus = s.reset_status === 'REQUESTED';
+    else if (statusFilter === 'SUBMITTED') matchStatus = s.status === 'SUBMITTED';
     return matchSearch && matchStatus;
   });
 
@@ -208,28 +212,87 @@ export default function LiveExamMonitor() {
           </div>
         </div>
 
-        {/* Live Status KPI Summary Counters */}
+        {/* Interactive Live Status KPI Filter Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs text-center">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Total Candidates</span>
-            <span className="text-xl font-black text-slate-900 mt-0.5 block">{totalInRoom}</span>
-          </div>
-          <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-xs text-center bg-emerald-50/30">
-            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block font-mono">🟢 Online Active</span>
-            <span className="text-xl font-black text-emerald-600 mt-0.5 block">{activeCount}</span>
-          </div>
-          <div className="bg-white p-3.5 rounded-xl border border-rose-200 shadow-xs text-center bg-rose-50/30">
-            <span className="text-[10px] font-bold text-rose-700 uppercase tracking-wider block font-mono">🔴 Suspended</span>
-            <span className="text-xl font-black text-rose-600 mt-0.5 block">{lockedCount}</span>
-          </div>
-          <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-xs text-center bg-amber-50/30">
-            <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block font-mono">🟡 Appeals</span>
-            <span className="text-xl font-black text-amber-600 mt-0.5 block">{appealsCount}</span>
-          </div>
-          <div className="bg-white p-3.5 rounded-xl border border-blue-200 shadow-xs text-center bg-blue-50/30">
-            <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block font-mono">🔵 Submitted</span>
-            <span className="text-xl font-black text-blue-600 mt-0.5 block">{submittedCount}</span>
-          </div>
+          <button
+            onClick={() => setStatusFilter('')}
+            className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === ''
+                ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-900/20'
+                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-xs'
+            }`}
+          >
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${statusFilter === '' ? 'text-slate-300' : 'text-slate-400'}`}>
+              Total Candidates
+            </span>
+            <span className={`text-xl font-black mt-0.5 block ${statusFilter === '' ? 'text-white' : 'text-slate-900'}`}>
+              {totalInRoom}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('IN_PROGRESS')}
+            className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === 'IN_PROGRESS'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/20'
+                : 'bg-white border-emerald-200 text-emerald-800 hover:bg-emerald-50/40 shadow-xs'
+            }`}
+          >
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${statusFilter === 'IN_PROGRESS' ? 'text-emerald-100' : 'text-emerald-700'}`}>
+              🟢 Online Active
+            </span>
+            <span className={`text-xl font-black mt-0.5 block ${statusFilter === 'IN_PROGRESS' ? 'text-white' : 'text-emerald-600'}`}>
+              {activeCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('LOCKED')}
+            className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === 'LOCKED'
+                ? 'bg-rose-600 text-white border-rose-600 shadow-md ring-2 ring-rose-500/20'
+                : 'bg-white border-rose-200 text-rose-800 hover:bg-rose-50/40 shadow-xs'
+            }`}
+          >
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${statusFilter === 'LOCKED' ? 'text-rose-100' : 'text-rose-700'}`}>
+              🔴 Suspended
+            </span>
+            <span className={`text-xl font-black mt-0.5 block ${statusFilter === 'LOCKED' ? 'text-white' : 'text-rose-600'}`}>
+              {lockedCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('APPEALS')}
+            className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === 'APPEALS'
+                ? 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-500/20'
+                : 'bg-white border-amber-200 text-amber-800 hover:bg-amber-50/40 shadow-xs'
+            }`}
+          >
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${statusFilter === 'APPEALS' ? 'text-amber-100' : 'text-amber-700'}`}>
+              🟡 Appeals
+            </span>
+            <span className={`text-xl font-black mt-0.5 block ${statusFilter === 'APPEALS' ? 'text-white' : 'text-amber-600'}`}>
+              {appealsCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('SUBMITTED')}
+            className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer ${
+              statusFilter === 'SUBMITTED'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-500/20'
+                : 'bg-white border-blue-200 text-blue-800 hover:bg-blue-50/40 shadow-xs'
+            }`}
+          >
+            <span className={`text-[10px] font-bold uppercase tracking-wider block font-mono ${statusFilter === 'SUBMITTED' ? 'text-blue-100' : 'text-blue-700'}`}>
+              🔵 Submitted
+            </span>
+            <span className={`text-xl font-black mt-0.5 block ${statusFilter === 'SUBMITTED' ? 'text-white' : 'text-blue-600'}`}>
+              {submittedCount}
+            </span>
+          </button>
         </div>
 
         {/* Filters & Candidate Search Bar */}
@@ -245,17 +308,19 @@ export default function LiveExamMonitor() {
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500 w-full sm:w-auto font-medium cursor-pointer"
-          >
-            <option value="">All Session Statuses</option>
-            <option value="IN_PROGRESS">🟢 Online (In Progress)</option>
-            <option value="LOCKED">🔴 Suspended (Locked)</option>
-            <option value="INTERRUPTED">🟠 Interrupted</option>
-            <option value="SUBMITTED">🔵 Submitted & Sealed</option>
-          </select>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {statusFilter && (
+              <button
+                onClick={() => setStatusFilter('')}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-2 rounded-xl transition cursor-pointer"
+              >
+                Clear Filter
+              </button>
+            )}
+            <span className="text-xs text-slate-400 font-mono whitespace-nowrap">
+              Showing {filteredSessions.length} of {totalInRoom}
+            </span>
+          </div>
         </div>
 
         {/* Sessions Grid */}
