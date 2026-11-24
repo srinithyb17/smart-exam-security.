@@ -1,0 +1,8 @@
+Dockerfile
+docker-compose.yml
+render.yaml
+.git
+.vercel
+node_modules
+server/node_modules
+client/node_modules
