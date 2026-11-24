@@ -110,7 +110,12 @@ export default function ExamScreen({ examId }) {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.message || 'Unable to initialize secure exam session');
+          if (err.message && err.message.toLowerCase().includes('locked')) {
+            setIsLocked(true);
+            setLockMessage(err.message);
+          } else {
+            setError(err.message || 'Unable to initialize secure exam session');
+          }
           setLoading(false);
         }
       }
